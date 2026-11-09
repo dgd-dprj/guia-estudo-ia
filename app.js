@@ -344,6 +344,7 @@
       dialogo(fala, el("div", { classe: "acoes" }, [
         el("a", { classe: "botao", href: "#/modulo/" + atual.id + "/0", texto: "▶ Jogar fase " + n }),
         el("a", { classe: "botao secundario", href: "#/inventario", texto: "🎒 Inventário" }),
+        el("a", { classe: "botao secundario", href: "#/inicio/salvar", texto: "💾 Como salva" }),
       ])),
       montarMundo(),
       el("div", { classe: "legenda" }, [
@@ -363,7 +364,27 @@
           el("span", { classe: "pct", texto: pct + "%" }),
         ])]);
       })),
+      explicacaoSalvar(),
     ];
+  }
+
+  // Explicação de como o progresso é guardado (no mapa e no Inventário).
+  function explicacaoSalvar() {
+    const enviar = el("div", { classe: "acoes" }, [
+      botaoEnviar(),
+      el("a", { classe: "botao secundario", href: "#/inventario", texto: "💾 Salvar ou carregar" }),
+    ]);
+    return el("section", { classe: "pergaminho como-salva", id: "como-salva" }, [
+      el("h3", { texto: "💾 Como seu progresso fica salvo" }),
+      el("ul", {}, [
+        el("li", {}, [el("strong", { texto: "Salva sozinho. " }), "Tudo o que você marca, responde no quiz e escreve no diário fica guardado na hora. Não precisa apertar nenhum botão: pode fechar a página e voltar depois."]),
+        el("li", {}, [el("strong", { texto: "Fica só neste navegador. " }), "Em outro computador, em outro navegador ou no celular, a jornada começa do zero. Para continuar em outro lugar, use \"💾 Salvar progresso\" aqui e \"📂 Carregar\" lá, no Inventário."]),
+        el("li", {}, [el("strong", { texto: "Cuidado ao limpar o navegador. " }), "Apagar os dados de navegação faz o progresso sumir. A janela anônima também não guarda nada depois de fechada. Por isso, salve o arquivo de vez em quando: ele é a sua cópia de segurança."]),
+        el("li", {}, [el("strong", { texto: "A Nicole e o Ícaro não veem sozinhos. " }), "Eles só veem seu progresso no painel quando você usa \"📤 Enviar progresso\". Mande uma vez por semana."]),
+        el("li", {}, [el("strong", { texto: "O envio não é cópia de segurança. " }), "Ele leva só as contagens (XP, fases, quiz e dias de estudo) e não serve para recuperar o progresso. Suas anotações do diário nunca vão: ficam só com você."]),
+      ]),
+      enviar,
+    ]);
   }
 
   const PASSOS = ["Missão", "Ponte", "Baú", "Quiz", "Pensar", "Treino", "Maria", "Chefão", "Diário"];
@@ -507,6 +528,7 @@
       ]))),
       el("h3", { texto: "🔒 Habilidades a ganhar" }),
       el("div", { classe: "slots" }, p.a_desenvolver.map((t) => el("div", { classe: "slot bloqueado" }, [el("span", { classe: "icone", texto: "✨" }), el("p", { texto: t })]))),
+      el("p", { classe: "meta" }, ["💾 Seu progresso salva sozinho, neste navegador. ", el("a", { href: "#/inicio/salvar", texto: "Entenda como funciona" })]),
       el("h3", { texto: "📤 Enviar à equipe" }),
       el("p", { classe: "meta", texto: "Abre uma issue no GitHub já preenchida com seu progresso. É só confirmar. O envio é público e não leva as anotações do diário." }),
       el("div", { classe: "acoes" }, [botaoEnviar(), el("a", { classe: "botao secundario", href: "#/painel", texto: "📊 Ver o painel" })]),
@@ -1074,7 +1096,9 @@
     conteudo.replaceChildren(...pagina.filter(Boolean));
     document.querySelectorAll(".hud-menu a").forEach((a) => a.classList.toggle("ativo", a.getAttribute("href") === "#/" + partes[0]));
     conteudo.focus({ preventScroll: true });
-    window.scrollTo(0, 0);
+    const alvo = partes[0] === "inicio" && partes[1] === "salvar" ? document.getElementById("como-salva") : null;
+    if (alvo) alvo.scrollIntoView({ block: "start" });
+    else window.scrollTo(0, 0);
     atualizarHud();
   }
   document.addEventListener("keydown", (ev) => {

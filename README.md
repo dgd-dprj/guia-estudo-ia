@@ -58,7 +58,8 @@ Cada botão do menu tem o ícone e o nome:
   - **Não leva as anotações do diário.**
   - A issue é pública e é fechada na hora pelo workflow `organizar-envios`, com a etiqueta `progresso`.
 - **Para trocar de computador:** use **"💾 Salvar progresso"**, que gera um arquivo `.json`, e **"📂 Carregar"** do outro lado.
-- **Cuidado:** limpar os dados do navegador apaga o progresso. Envie ou salve de vez em quando.
+- **Cuidado:** limpar os dados do navegador apaga o progresso. Salve o arquivo de vez em quando: o envio à equipe leva só contagens e não serve para recuperar o progresso.
+- **Na página:** o painel "💾 Como seu progresso fica salvo", embaixo do mapa, explica isso para a Marcelle. O botão "💾 Como salva", na fala da Coruja, leva direto a ele.
 
 ## As tarefas
 

@@ -247,6 +247,10 @@ textarea {
 .pergaminho h4 { color: #7a2a12; }
 .pergaminho ol { padding-left: 26px; margin: 0; }
 .pergaminho li { margin-bottom: 12px; }
+.pergaminho ul { padding-left: 24px; margin: 0; }
+.como-salva { margin-top: 28px; scroll-margin-top: 150px; }
+.como-salva h3 { margin-top: 0; color: #7a2a12; text-shadow: none; }
+.como-salva strong { color: #7a2a12; }
 
 .acoes { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
 
