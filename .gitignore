@@ -1,0 +1,5 @@
+# Progresso baixado da plataforma: é pessoal, não vai para o repositório.
+progresso-guia-ia*.json
+__pycache__/
+.DS_Store
+Thumbs.db

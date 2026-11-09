@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jornada IA da Marcelle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <header class="hud">
+    <a class="hud-heroi" href="#/inicio" aria-label="Voltar ao mapa">
+      <span class="hud-avatar" id="hud-avatar" aria-hidden="true"></span>
+      <span class="hud-nome" id="hud-nome">Marcelle</span>
+    </a>
+    <div class="hud-status" aria-live="polite">
+      <div class="hud-nivel"><span id="hud-nivel-emoji" aria-hidden="true">🌱</span> <span id="hud-nivel">Nv 1</span></div>
+      <div class="hud-xp" title="Experiência">
+        <div class="xp-barra"><div class="xp-cheia" id="hud-xp-barra"></div></div>
+        <span id="hud-xp">0 XP</span>
+      </div>
+      <div class="hud-dias" title="Dias seguidos estudando">🔥 <span id="hud-dias">0</span></div>
+    </div>
+    <nav class="hud-menu" aria-label="Menu">
+      <a href="#/inicio" title="Mapa" aria-label="Mapa">🗺️</a>
+      <a href="#/inventario" title="Inventário" aria-label="Inventário">🎒</a>
+      <a href="#/conquistas" title="Conquistas" aria-label="Conquistas">🏅</a>
+      <a href="#/maria" title="Livro da Maria" aria-label="Livro da Maria">📘</a>
+      <a href="#/regras" title="Regras do jogo" aria-label="Regras do jogo">📜</a>
+      <a href="#/glossario" title="Glossário" aria-label="Glossário">📖</a>
+    </nav>
+  </header>
+
+  <main id="conteudo" tabindex="-1"></main>
+
+  <div class="avisos" id="avisos" aria-live="polite"></div>
+
+  <script src="dados/guia.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
