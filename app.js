@@ -64,6 +64,7 @@
     return {
       marcados: p.marcados || {}, notas: p.notas || {}, quiz: p.quiz || {}, dias: p.dias || [],
       historico: p.historico || {}, quizPrimeira: p.quizPrimeira || {}, concluidas: p.concluidas || {},
+      tarefas: p.tarefas || {}, // por tarefa: passos marcados e o texto da entrega
     };
   }
   function lerProgresso() {
@@ -346,6 +347,15 @@
         el("a", { classe: "botao secundario", href: "#/inventario", texto: "🎒 Inventário" }),
         el("a", { classe: "botao secundario", href: "#/inicio/salvar", texto: "💾 Como salva" }),
       ])),
+      (() => {
+        const u = tarefaUrgente();
+        if (!u) return null;
+        const s = situacaoPrazo(u, hoje());
+        return el("a", { classe: "faixa-urgente", href: "#/tarefas" }, [
+          el("strong", { texto: "🚨 Tarefa urgente: " + u.id + " — " + u.titulo }),
+          el("span", { texto: s.texto + " · Abrir ▶" }),
+        ]);
+      })(),
       montarMundo(),
       el("div", { classe: "legenda" }, [
         el("span", { classe: "l-feito", texto: "fase completa" }),
@@ -619,6 +629,9 @@
     avaliada: { icone: "✅", nome: "Avaliada", classe: "bom" },
   };
   const foiEntregue = (t) => t.status === "entregue" || t.status === "avaliada";
+  const horaPrazo = (t) => (/^\d{2}:\d{2}$/.test(t.prazo_hora || "") ? t.prazo_hora : null);
+  const textoPrazo = (t) => dataLonga(t.prazo) + (horaPrazo(t) ? " às " + horaPrazo(t) : "");
+  const tarefaUrgente = () => (T.tarefas || []).find((t) => t.urgente && !foiEntregue(t));
   function situacaoPrazo(t, ref) {
     if (!dataValida(t.prazo)) return { texto: "sem prazo", classe: "neutro", atraso: 0 };
     const em = t.entrega && dataValida(t.entrega.em) ? t.entrega.em : null;
@@ -630,6 +643,15 @@
     }
     if (foiEntregue(t)) return { texto: "entregue (sem data)", classe: "neutro", atraso: 0 };
     const falta = diaNum(t.prazo) - diaNum(ref);
+    const hora = horaPrazo(t);
+    if (falta === 0 && hora && ref === hoje()) {
+      const [h, m] = hora.split(":").map(Number);
+      const agora = new Date();
+      const min = h * 60 + m - (agora.getHours() * 60 + agora.getMinutes());
+      if (min < 0) return { texto: "⚠ passou das " + hora, classe: "critico", atraso: 0, atrasada: true };
+      const resta = min >= 60 ? Math.floor(min / 60) + "h" + String(min % 60).padStart(2, "0") : min + " min";
+      return { texto: "⏰ hoje até as " + hora + " (faltam " + resta + ")", classe: "urgente", atraso: 0 };
+    }
     if (falta < 0) return { texto: "⚠ atrasada " + plural(-falta, "dia", "dias"), classe: "critico", atraso: -falta, atrasada: true };
     return { texto: falta === 0 ? "⏰ vence hoje" : "⏳ faltam " + plural(falta, "dia", "dias"), classe: "neutro", atraso: 0 };
   }
@@ -665,54 +687,132 @@
   function issuesDaMaria(lista) {
     return (lista || []).length ? el("span", {}, lista.flatMap((n, j) => (j ? [", ", linkIssue(n)] : [linkIssue(n)]))) : "—";
   }
+  // A parte da entrega: o que a jogadora marca e escreve fica no navegador (progresso.tarefas)
+  // e vira o texto da issue [entrega] num clique.
+  function blocoEntrega(t, passos) {
+    const salvo = progresso.tarefas[t.id] || (progresso.tarefas[t.id] = { feitos: {}, respostas: {} });
+    const campos = Array.isArray(t.campos_entrega) ? t.campos_entrega : [];
+    const areas = campos.map((c) => {
+      const ta = el("textarea", { id: "e-" + t.id + "-" + c.id, rows: "4", classe: "campo-entrega" });
+      ta.value = salvo.respostas[c.id] || "";
+      ta.addEventListener("input", () => { salvo.respostas[c.id] = ta.value; salvar(); });
+      return el("div", { classe: "campo" }, [el("label", { for: ta.id, texto: c.rotulo }), ta]);
+    });
+    const resumoPasso = (p) => p.split(/[:.]/)[0].slice(0, 80);
+    const montarCorpo = () => {
+      const feitos = passos.filter((_, i) => salvo.feitos[i]).length;
+      let c = "Tarefa: " + t.id + " — " + t.titulo + "\n\n";
+      if (passos.length) c += "Passos concluídos: " + feitos + "/" + passos.length + "\n\n" + passos.map((p, i) => "- [" + (salvo.feitos[i] ? "x" : " ") + "] " + (i + 1) + ". " + resumoPasso(p)).join("\n") + "\n\n";
+      c += campos.length
+        ? campos.map((cp) => "## " + cp.rotulo + "\n\n" + ((salvo.respostas[cp.id] || "").trim() || "(não preenchido)")).join("\n\n") + "\n\n"
+        : "Link do PR ou da issue: \n\nO que fiz: \n\nComo testei: \n\n";
+      return c + "(Sem dados pessoais de assistidos e sem chaves.)";
+    };
+    const enviar = el("button", { type: "button", classe: "botao", texto: "📬 Enviar entrega" });
+    enviar.addEventListener("click", () => {
+      const vazios = campos.filter((c) => !(salvo.respostas[c.id] || "").trim()).length;
+      if (vazios && !window.confirm("Faltam " + plural(vazios, "campo", "campos") + " para preencher. Enviar assim mesmo?")) return;
+      const titulo = "[entrega] " + t.id + " — " + t.titulo;
+      const corpo = montarCorpo();
+      let url = linkNovaIssue(titulo, corpo);
+      if (url.length > 7500) {
+        // Texto grande demais para ir no endereço: copia e pede para colar.
+        if (navigator.clipboard) navigator.clipboard.writeText(corpo).catch(() => {});
+        url = linkNovaIssue(titulo, "O texto da entrega foi copiado pela página. Apague esta linha, cole aqui (Ctrl+V) e confirme.");
+        avisar("📋 Texto copiado: cole na issue com Ctrl+V", true);
+      }
+      window.open(url, "_blank", "noopener");
+    });
+    return el("section", { classe: "tarefa-bloco entrega-tarefa" }, [
+      el("h4", { texto: "📬 Entrega" }),
+      t.entregavel ? el("p", { texto: t.entregavel }) : null,
+      ...areas,
+      el("p", { classe: "meta", texto: "O que você escreve aqui fica salvo neste navegador. O botão abre o GitHub com tudo preenchido, incluindo os passos que você marcou: é só conferir e confirmar." }),
+      el("div", { classe: "acoes" }, [enviar]),
+    ]);
+  }
+  function listaPassos(t, passos, aoMudar) {
+    const salvo = progresso.tarefas[t.id] || (progresso.tarefas[t.id] = { feitos: {}, respostas: {} });
+    return el("ul", { classe: "lista-check passos-tarefa" }, passos.map((p, i) => {
+      const id = "p-" + t.id + "-" + i;
+      const cx = el("input", { type: "checkbox", id: id });
+      cx.checked = !!salvo.feitos[i];
+      const li = el("li", { classe: cx.checked ? "feito" : null }, [cx, el("label", { for: id }, [el("strong", { texto: (i + 1) + ". " }), p])]);
+      cx.addEventListener("change", () => {
+        if (cx.checked) salvo.feitos[i] = true; else delete salvo.feitos[i];
+        li.classList.toggle("feito", cx.checked);
+        salvar();
+        aoMudar();
+      });
+      return li;
+    }));
+  }
   function cartaoTarefa(t) {
     const prazo = situacaoPrazo(t, hoje());
     const detalhes = Array.isArray(t.issues_detalhe) ? t.issues_detalhe : [];
-    const corpo = "Tarefa: " + t.id + " — " + t.titulo + "\n\n" + (detalhes.length
-      ? detalhes.map((d) => "## #" + d.numero + " — " + d.titulo + "\n\n1. O problema: \n\n2. Onde no código: \n\n3. Como eu mexeria: \n\n4. Como saberia que resolveu: \n").join("\n") + "\n## Uma dúvida que ficou\n\n"
-      : "Link do PR ou da issue: \n\nO que fiz: \n\nComo testei: \n\nDúvidas: \n\n") + "(Sem dados pessoais de assistidos e sem chaves.)";
+    const passos = Array.isArray(t.passos) ? t.passos : [];
+    const casos = Array.isArray(t.casos_teste) ? t.casos_teste : [];
     const entrega = t.entrega || {};
     const lista = (itens, ordenada) => el(ordenada ? "ol" : "ul", { classe: "tarefa-lista" }, itens.map((x) => el("li", { texto: x })));
-    const bloco = (titulo, conteudo) => el("section", { classe: "tarefa-bloco" }, [el("h4", { texto: titulo }), conteudo]);
-    return el("article", { classe: "painel tarefa-cartao" }, [
-      el("div", { classe: "tarefa-topo" }, [el("span", { classe: "tarefa-id", texto: t.id }), el("h3", { texto: t.titulo }), seloStatus(t.status)]),
+    const bloco = (titulo, conteudo, extra) => el("section", { classe: "tarefa-bloco" }, [el("h4", {}, [titulo, extra || null]), conteudo]);
+    const contagem = el("span", { classe: "xp-tag" });
+    const contar = () => {
+      const s = progresso.tarefas[t.id] || { feitos: {} };
+      contagem.textContent = passos.filter((_, i) => s.feitos[i]).length + "/" + passos.length + " feitos";
+    };
+    contar();
+    return el("article", { classe: "painel tarefa-cartao" + (t.urgente && !foiEntregue(t) ? " urgente" : "") }, [
+      el("div", { classe: "tarefa-topo" }, [
+        el("span", { classe: "tarefa-id", texto: t.id }), el("h3", { texto: t.titulo }),
+        t.urgente && !foiEntregue(t) ? el("span", { classe: "selo critico", texto: "🚨 Urgente" }) : null,
+        seloStatus(t.status),
+      ]),
       el("p", { texto: t.descricao }),
       el("dl", { classe: "fichas" }, [
         ficha("Fase", t.fase ? linkSeguro(nomeFase(t.fase), "#/modulo/" + t.fase + "/6") : "—"),
         ficha("Lançada por", (t.lancada_por || "—") + " em " + dataLonga(t.lancada_em)),
-        ficha("Prazo", el("span", {}, [dataLonga(t.prazo) + " ", el("span", { classe: "prazo " + prazo.classe, texto: prazo.texto })])),
+        ficha("Prazo", el("span", {}, [textoPrazo(t) + " ", el("span", { classe: "prazo " + prazo.classe, texto: prazo.texto })])),
         ficha("Issues da Maria", issuesDaMaria(t.issues_maria)),
         ficha("Entrega", entrega.link ? linkSeguro("abrir a entrega", entrega.link) : dataValida(entrega.em) ? dataLonga(entrega.em) : "—"),
         t.tempo ? ficha("Tempo estimado", t.tempo) : null,
       ]),
       entrega.observacao ? el("p", { classe: "meta" }, ["📝 ", entrega.observacao]) : null,
       t.objetivo ? bloco("🎯 Objetivo", el("p", { texto: t.objetivo })) : null,
-      Array.isArray(t.passos) && t.passos.length ? bloco("🪜 Passo a passo", lista(t.passos, true)) : null,
+      t.contexto ? bloco("🧭 Para entender", el("p", { texto: t.contexto })) : null,
+      passos.length ? bloco("🪜 Passo a passo ", el("div", {}, [
+        el("p", { classe: "meta", texto: "Marque cada passo quando terminar. Fica salvo neste navegador e vai junto na entrega." }),
+        listaPassos(t, passos, contar),
+      ]), contagem) : null,
       detalhes.length ? bloco("🔎 As issues, uma por uma", el("div", { classe: "issues-detalhe" }, detalhes.map((d) => el("div", { classe: "issue-cartao" }, [
         el("h5", {}, [linkIssue(d.numero), " · " + d.titulo]),
         d.resumo ? el("p", { texto: d.resumo }) : null,
         Array.isArray(d.olhar) && d.olhar.length ? el("div", {}, [el("strong", { texto: "📂 Onde olhar" }), lista(d.olhar)]) : null,
         Array.isArray(d.perguntas) && d.perguntas.length ? el("div", {}, [el("strong", { texto: "❓ Perguntas-guia" }), lista(d.perguntas)]) : null,
       ])))) : null,
-      t.entregavel ? bloco("📦 O que entregar", el("p", { texto: t.entregavel })) : null,
+      casos.length ? bloco("🧪 Casos para testar", el("ol", { classe: "tarefa-lista" }, casos.map((c) => el("li", {}, [
+        el("strong", { texto: "Relato: " }), "“" + c.relato + "”", el("br"), el("strong", { texto: "Esperado: " }), c.esperado,
+      ])))) : null,
       Array.isArray(t.pronto_quando) && t.pronto_quando.length ? bloco("🏁 Pronto quando", lista(t.pronto_quando)) : null,
       Array.isArray(t.cuidados) && t.cuidados.length ? bloco("⚠️ Cuidados", el("div", { classe: "cuidado" }, [lista(t.cuidados)])) : null,
+      foiEntregue(t) ? (t.entregavel ? bloco("📦 O que foi pedido", el("p", { texto: t.entregavel })) : null) : blocoEntrega(t, passos),
       el("h4", { texto: "⭐ Avaliação" }),
       blocoAvaliacao(t),
-      foiEntregue(t) ? null : el("div", { classe: "acoes" }, [
-        linkExterno("📬 Avisar entrega", linkNovaIssue("[entrega] " + t.id + " — " + t.titulo, corpo), "botao"),
-      ]),
     ]);
   }
   function paginaTarefas() {
     const lista = T.tarefas || [];
     const abertas = lista.filter((t) => !foiEntregue(t)).length;
+    const urgente = tarefaUrgente();
     const fala = !lista.length ? "Ainda não há tarefas lançadas. Quando a Nicole ou o Ícaro lançarem, elas aparecem aqui."
-      : "Estas são as tarefas que a Nicole e o Ícaro lançaram para você.\n" + (abertas ? "Em aberto: " + abertas + ". Ao terminar, use \"Avisar entrega\"." : "Tudo entregue! 🎉");
+      : urgente ? "🚨 Tarefa urgente: " + urgente.id + " — " + urgente.titulo + ".\nPrazo: " + textoPrazo(urgente) + ". Comece por ela!"
+        : "Estas são as tarefas que a Nicole e o Ícaro lançaram para você.\n" + (abertas ? "Em aberto: " + abertas + ". Ao terminar, use \"Enviar entrega\"." : "Tudo entregue! 🎉");
+    // Urgente em aberto primeiro; depois as abertas pelo prazo; as entregues no fim.
+    const ordem = (t) => (foiEntregue(t) ? 2 : t.urgente ? 0 : 1);
+    const ordenadas = lista.slice().sort((a, b) => ordem(a) - ordem(b) || String(a.prazo || "9").localeCompare(String(b.prazo || "9")));
     return [
       dialogo(fala),
       el("div", { classe: "legenda" }, Object.values(STATUS).map((s) => el("span", { classe: "selo " + s.classe, texto: s.icone + " " + s.nome }))),
-      ...lista.slice().reverse().map(cartaoTarefa),
+      ...ordenadas.map(cartaoTarefa),
       el("details", { classe: "como-lancar" }, [
         el("summary", { texto: "🧭 Como lançar uma tarefa (Nicole e Ícaro)" }),
         el("p", { texto: T.explicacao || "" }),
@@ -805,7 +905,8 @@
             if (r) lista.push(r);
           } else if (titulo.startsWith("[entrega]")) {
             const id = (/^\[entrega\]\s*(T\d+)/.exec(titulo) || [])[1];
-            if (id) entregas[id] = { data: data, link: i.html_url };
+            const passos = /Passos concluídos:\s*(\d+)\/(\d+)/.exec(i.body || "");
+            if (id) entregas[id] = { data: data, link: i.html_url, passos: passos ? passos[1] + "/" + passos[2] : null };
           }
         });
         envios = { estado: "pronto", lista: lista, entregas: entregas, erro: null };
@@ -1057,8 +1158,8 @@
       return [
         el("span", {}, [el("strong", { texto: t.id + " " }), t.titulo]),
         t.fase ? el("a", { href: "#/modulo/" + t.fase + "/6", texto: nomeFase(t.fase).split(":")[0] }) : "—",
-        dataLonga(t.lancada_em), dataLonga(t.prazo),
-        el("span", {}, [seloStatus(t.status), aviso && !foiEntregue(t) ? el("span", { classe: "meta" }, [" · avisou em " + dataCurta(aviso.data) + " ", linkSeguro("(issue)", aviso.link)]) : null]),
+        dataLonga(t.lancada_em), textoPrazo(t),
+        el("span", {}, [seloStatus(t.status), aviso && !foiEntregue(t) ? el("span", { classe: "meta" }, [" · enviou em " + dataCurta(aviso.data) + (aviso.passos ? " · passos " + aviso.passos : "") + " ", linkSeguro("(issue)", aviso.link)]) : null]),
         el("span", { classe: "prazo " + sit[k].classe, texto: sit[k].texto }),
         fmtNota(notaMedia(t)),
       ];

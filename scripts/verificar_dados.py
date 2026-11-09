@@ -65,7 +65,20 @@ def verificar_tarefas(t: dict, ids_modulo: set[str]) -> list[str]:
             problemas.append(f"{nome}: 'prazo' precisa ser AAAA-MM-DD ou null")
         if not all(isinstance(n, int) for n in x.get("issues_maria", [])):
             problemas.append(f"{nome}: os números em 'issues_maria' precisam ser inteiros")
-        for campo in ("objetivo", "tempo", "entregavel"):
+        if "urgente" in x and not isinstance(x["urgente"], bool):
+            problemas.append(f"{nome}: 'urgente' precisa ser true ou false")
+        if x.get("prazo_hora") is not None and not re.match(r"^([01]\d|2[0-3]):[0-5]\d$", str(x["prazo_hora"])):
+            problemas.append(f"{nome}: 'prazo_hora' precisa ser HH:MM")
+        for c in x.get("casos_teste", []):
+            if not c.get("relato") or not c.get("esperado"):
+                problemas.append(f"{nome}: cada caso de teste precisa de 'relato' e 'esperado'")
+        ids_campos = [c.get("id") for c in x.get("campos_entrega", [])]
+        if len(ids_campos) != len(set(ids_campos)) or not all(ids_campos):
+            problemas.append(f"{nome}: os campos de entrega precisam de 'id' único")
+        for c in x.get("campos_entrega", []):
+            if not c.get("rotulo"):
+                problemas.append(f"{nome}: o campo de entrega '{c.get('id')}' precisa de 'rotulo'")
+        for campo in ("objetivo", "contexto", "tempo", "entregavel"):
             if campo in x and not (isinstance(x[campo], str) and x[campo].strip()):
                 problemas.append(f"{nome}: '{campo}' precisa ser um texto")
         for campo in ("passos", "pronto_quando", "cuidados"):
