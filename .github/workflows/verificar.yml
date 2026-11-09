@@ -1,0 +1,28 @@
+name: verificar
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Dados do guia
+        run: python scripts/verificar_dados.py
+      - name: Sintaxe do JavaScript
+        run: |
+          node --check app.js
+          node --check dados/guia.js
