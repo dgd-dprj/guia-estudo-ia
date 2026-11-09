@@ -1,0 +1,40 @@
+name: organizar-envios
+
+# Etiqueta as issues que a página abre.
+# - [progresso]: fecha na hora. O painel lê também as fechadas, e a lista de issues fica limpa.
+# - [entrega]: fica aberta, para a Nicole e o Ícaro avaliarem.
+# O título nunca entra no comando: só o número da issue.
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  progresso:
+    if: startsWith(github.event.issue.title, '[progresso]')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Etiquetar e fechar
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          NUMERO: ${{ github.event.issue.number }}
+        run: |
+          gh label create progresso --repo "$REPO" --color 8a4fff --description "Envio de progresso da Jornada IA" --force
+          gh issue edit "$NUMERO" --repo "$REPO" --add-label progresso
+          gh issue close "$NUMERO" --repo "$REPO" --reason completed
+
+  entrega:
+    if: startsWith(github.event.issue.title, '[entrega]')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Etiquetar
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          NUMERO: ${{ github.event.issue.number }}
+        run: |
+          gh label create entrega --repo "$REPO" --color ffd23f --description "Aviso de entrega de tarefa" --force
+          gh issue edit "$NUMERO" --repo "$REPO" --add-label entrega

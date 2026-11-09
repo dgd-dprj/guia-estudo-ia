@@ -28,7 +28,7 @@ jobs:
         run: |
           mkdir -p _site/dados
           cp index.html estilo.css app.js _site/
-          cp dados/guia.js _site/dados/
+          cp dados/guia.js dados/tarefas.js _site/dados/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

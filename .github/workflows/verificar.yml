@@ -26,3 +26,4 @@ jobs:
         run: |
           node --check app.js
           node --check dados/guia.js
+          node --check dados/tarefas.js

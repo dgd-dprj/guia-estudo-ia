@@ -1176,7 +1176,8 @@ window.GUIA = {
     }
   ],
   "jogadora": {
-    "nome": "Marcelle"
+    "nome": "Marcelle",
+    "github": "marcellemarinsdef"
   },
   "xp": {
     "estudar": 10,
@@ -1222,5 +1223,10 @@ window.GUIA = {
       "nome": "Desenvolvedora de IA",
       "emoji": "🚀"
     }
+  ],
+  "repositorio_guia": "dgd-dprj/guia-estudo-ia",
+  "avaliadores": [
+    "Nicole",
+    "Ícaro"
   ]
 };
