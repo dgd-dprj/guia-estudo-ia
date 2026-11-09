@@ -65,6 +65,18 @@ def verificar_tarefas(t: dict, ids_modulo: set[str]) -> list[str]:
             problemas.append(f"{nome}: 'prazo' precisa ser AAAA-MM-DD ou null")
         if not all(isinstance(n, int) for n in x.get("issues_maria", [])):
             problemas.append(f"{nome}: os números em 'issues_maria' precisam ser inteiros")
+        for campo in ("objetivo", "tempo", "entregavel"):
+            if campo in x and not (isinstance(x[campo], str) and x[campo].strip()):
+                problemas.append(f"{nome}: '{campo}' precisa ser um texto")
+        for campo in ("passos", "pronto_quando", "cuidados"):
+            if campo in x and not (isinstance(x[campo], list) and all(isinstance(i, str) and i.strip() for i in x[campo])):
+                problemas.append(f"{nome}: '{campo}' precisa ser uma lista de textos")
+        for d in x.get("issues_detalhe", []):
+            if not isinstance(d.get("numero"), int) or not d.get("titulo"):
+                problemas.append(f"{nome}: cada item de 'issues_detalhe' precisa de 'numero' (inteiro) e 'titulo'")
+            for campo in ("olhar", "perguntas"):
+                if campo in d and not (isinstance(d[campo], list) and all(isinstance(i, str) for i in d[campo])):
+                    problemas.append(f"{nome}, issue {d.get('numero')}: '{campo}' precisa ser uma lista de textos")
         entrega = x.get("entrega") or {}
         if not data_ok(entrega.get("em"), opcional=True):
             problemas.append(f"{nome}: 'entrega.em' precisa ser AAAA-MM-DD ou null")

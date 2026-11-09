@@ -667,8 +667,13 @@
   }
   function cartaoTarefa(t) {
     const prazo = situacaoPrazo(t, hoje());
-    const corpo = "Tarefa: " + t.id + " — " + t.titulo + "\n\nLink do PR ou da issue: \n\nO que fiz: \n\nComo testei: \n\nDúvidas: \n\n(Sem dados pessoais de assistidos e sem chaves.)";
+    const detalhes = Array.isArray(t.issues_detalhe) ? t.issues_detalhe : [];
+    const corpo = "Tarefa: " + t.id + " — " + t.titulo + "\n\n" + (detalhes.length
+      ? detalhes.map((d) => "## #" + d.numero + " — " + d.titulo + "\n\n1. O problema: \n\n2. Onde no código: \n\n3. Como eu mexeria: \n\n4. Como saberia que resolveu: \n").join("\n") + "\n## Uma dúvida que ficou\n\n"
+      : "Link do PR ou da issue: \n\nO que fiz: \n\nComo testei: \n\nDúvidas: \n\n") + "(Sem dados pessoais de assistidos e sem chaves.)";
     const entrega = t.entrega || {};
+    const lista = (itens, ordenada) => el(ordenada ? "ol" : "ul", { classe: "tarefa-lista" }, itens.map((x) => el("li", { texto: x })));
+    const bloco = (titulo, conteudo) => el("section", { classe: "tarefa-bloco" }, [el("h4", { texto: titulo }), conteudo]);
     return el("article", { classe: "painel tarefa-cartao" }, [
       el("div", { classe: "tarefa-topo" }, [el("span", { classe: "tarefa-id", texto: t.id }), el("h3", { texto: t.titulo }), seloStatus(t.status)]),
       el("p", { texto: t.descricao }),
@@ -678,8 +683,20 @@
         ficha("Prazo", el("span", {}, [dataLonga(t.prazo) + " ", el("span", { classe: "prazo " + prazo.classe, texto: prazo.texto })])),
         ficha("Issues da Maria", issuesDaMaria(t.issues_maria)),
         ficha("Entrega", entrega.link ? linkSeguro("abrir a entrega", entrega.link) : dataValida(entrega.em) ? dataLonga(entrega.em) : "—"),
+        t.tempo ? ficha("Tempo estimado", t.tempo) : null,
       ]),
       entrega.observacao ? el("p", { classe: "meta" }, ["📝 ", entrega.observacao]) : null,
+      t.objetivo ? bloco("🎯 Objetivo", el("p", { texto: t.objetivo })) : null,
+      Array.isArray(t.passos) && t.passos.length ? bloco("🪜 Passo a passo", lista(t.passos, true)) : null,
+      detalhes.length ? bloco("🔎 As issues, uma por uma", el("div", { classe: "issues-detalhe" }, detalhes.map((d) => el("div", { classe: "issue-cartao" }, [
+        el("h5", {}, [linkIssue(d.numero), " · " + d.titulo]),
+        d.resumo ? el("p", { texto: d.resumo }) : null,
+        Array.isArray(d.olhar) && d.olhar.length ? el("div", {}, [el("strong", { texto: "📂 Onde olhar" }), lista(d.olhar)]) : null,
+        Array.isArray(d.perguntas) && d.perguntas.length ? el("div", {}, [el("strong", { texto: "❓ Perguntas-guia" }), lista(d.perguntas)]) : null,
+      ])))) : null,
+      t.entregavel ? bloco("📦 O que entregar", el("p", { texto: t.entregavel })) : null,
+      Array.isArray(t.pronto_quando) && t.pronto_quando.length ? bloco("🏁 Pronto quando", lista(t.pronto_quando)) : null,
+      Array.isArray(t.cuidados) && t.cuidados.length ? bloco("⚠️ Cuidados", el("div", { classe: "cuidado" }, [lista(t.cuidados)])) : null,
       el("h4", { texto: "⭐ Avaliação" }),
       blocoAvaliacao(t),
       foiEntregue(t) ? null : el("div", { classe: "acoes" }, [

@@ -76,6 +76,9 @@ As tarefas ficam em `dados/tarefas.js`, em JSON, dentro de `window.TAREFAS = { .
   | `status` | `lancada`, `em_andamento`, `entregue`, `refazer` ou `avaliada` |
   | `entrega` | `em` (data), `link` (PR ou issue, `https://`) e `observacao` |
   | `avaliacao` | `por` (quem avaliou), `em`, uma nota de 1 a 5 para cada critério e `comentario` |
+  | Opcionais, para detalhar | `objetivo`, `tempo`, `passos` (lista), `issues_detalhe` (por issue: `numero`, `titulo`, `resumo`, `olhar` e `perguntas`), `entregavel`, `pronto_quando` (lista) e `cuidados` (lista) |
+
+  Com `issues_detalhe`, o "📬 Avisar entrega" abre a issue já com um bloco por issue para a Marcelle preencher.
 
 - **Critérios:** qualidade da entrega, testes, prazo, comunicação e autonomia. Os nomes ficam em `criterios`, no mesmo arquivo.
 - **Entrega:** na página de tarefas, a Marcelle usa **"📬 Avisar entrega"**, que abre uma issue `[entrega] T1 — título` com a etiqueta `entrega`. Depois, a Nicole ou o Ícaro atualizam a tarefa no arquivo, com a data, o link e a avaliação.

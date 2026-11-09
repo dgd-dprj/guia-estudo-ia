@@ -305,6 +305,15 @@ textarea {
 .nota-pixels i.cheio { background: var(--ouro); border-color: var(--ouro-escuro); }
 .comentario { background: var(--painel-2); padding: 8px 12px; border-left: 6px solid var(--ciano); }
 .como-lancar { margin-top: 24px; }
+.tarefa-bloco { margin-top: 18px; }
+.tarefa-bloco h4 { color: var(--ciano); }
+.tarefa-lista { margin: 6px 0 0; padding-left: 26px; }
+.tarefa-lista li { margin-bottom: 6px; }
+.issues-detalhe { display: grid; gap: 12px; }
+.issue-cartao { background: var(--painel-2); border: 3px solid var(--borda-escura); padding: 12px 14px; }
+.issue-cartao h5 { font: 10px/1.6 "Press Start 2P", monospace; margin: 0 0 8px; color: var(--ouro); }
+.issue-cartao p { margin: 0 0 10px; }
+.issue-cartao strong { display: block; margin-top: 6px; font-size: 18px; }
 
 /* ── Painel da equipe ─────────────────────────────────────────── */
 .fonte-painel { margin-top: 18px; padding: 12px 16px; }
