@@ -1,29 +1,87 @@
-"""Confere dados/guia.js antes de abrir a plataforma.
+"""Confere dados/guia.js e dados/tarefas.js antes de abrir a plataforma.
 
 Uso, na pasta do guia:
     python scripts/verificar_dados.py
 
-O arquivo é `window.GUIA = { ...JSON... };`. O script tira o começo e o fim, lê o JSON e confere
-os campos de cada parte. Sai com código 1 e lista os problemas, se houver.
+Os arquivos são `window.GUIA = { ...JSON... };` e `window.TAREFAS = { ...JSON... };`. O script tira
+o começo e o fim, lê o JSON e confere os campos de cada parte. Sai com código 1 e lista os
+problemas, se houver.
 """
 
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
-ARQUIVO = Path(__file__).resolve().parent.parent / "dados" / "guia.js"
+DADOS = Path(__file__).resolve().parent.parent / "dados"
+ARQUIVO = DADOS / "guia.js"
+ARQUIVO_TAREFAS = DADOS / "tarefas.js"
 CAMPOS_MODULO = ["id", "semana", "titulo", "objetivo", "ponte", "tempo", "estudar", "checar", "praticar", "tarefa", "pronto"]
 CAMPOS_TAREFA = ["titulo", "issues", "descricao", "onde", "como_testar", "cuidado"]
+CAMPOS_TAREFA_LANCADA = ["id", "titulo", "fase", "descricao", "lancada_por", "lancada_em", "prazo", "status", "entrega", "avaliacao"]
+STATUS = {"lancada", "em_andamento", "entregue", "refazer", "avaliada"}
+DATA = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
-def carregar() -> dict:
-    texto = ARQUIVO.read_text(encoding="utf-8").strip()
-    prefixo = "window.GUIA ="
+def carregar(arquivo: Path = ARQUIVO, prefixo: str = "window.GUIA =") -> dict:
+    texto = arquivo.read_text(encoding="utf-8").strip()
     if not texto.startswith(prefixo) or not texto.endswith(";"):
-        raise SystemExit(f"{ARQUIVO.name} precisa começar com '{prefixo}' e terminar com ';'")
+        raise SystemExit(f"{arquivo.name} precisa começar com '{prefixo}' e terminar com ';'")
     return json.loads(texto[len(prefixo) : -1])
+
+
+def data_ok(valor, opcional: bool = False) -> bool:
+    if valor is None:
+        return opcional
+    return isinstance(valor, str) and bool(DATA.match(valor))
+
+
+def verificar_tarefas(t: dict, ids_modulo: set[str]) -> list[str]:
+    problemas: list[str] = []
+    criterios = t.get("criterios")
+    if not isinstance(criterios, dict) or not criterios:
+        problemas.append("tarefas.js: falta 'criterios' (chave e nome de cada critério)")
+        criterios = {}
+    ids = [x.get("id") for x in t.get("tarefas", [])]
+    repetidos = {i for i in ids if ids.count(i) > 1}
+    if repetidos:
+        problemas.append(f"tarefas.js: ids repetidos: {sorted(repetidos)}")
+    for x in t.get("tarefas", []):
+        nome = f"tarefa {x.get('id', '?')}"
+        for campo in CAMPOS_TAREFA_LANCADA:
+            if campo not in x:
+                problemas.append(f"{nome}: falta '{campo}'")
+        if not re.match(r"^T\d+$", str(x.get("id", ""))):
+            problemas.append(f"{nome}: o id precisa ser T seguido de número (T1, T2...)")
+        if x.get("fase") and x["fase"] not in ids_modulo:
+            problemas.append(f"{nome}: a fase '{x['fase']}' não existe no guia")
+        if x.get("status") not in STATUS:
+            problemas.append(f"{nome}: status precisa ser um de {sorted(STATUS)}")
+        if not data_ok(x.get("lancada_em")):
+            problemas.append(f"{nome}: 'lancada_em' precisa ser AAAA-MM-DD")
+        if not data_ok(x.get("prazo"), opcional=True):
+            problemas.append(f"{nome}: 'prazo' precisa ser AAAA-MM-DD ou null")
+        if not all(isinstance(n, int) for n in x.get("issues_maria", [])):
+            problemas.append(f"{nome}: os números em 'issues_maria' precisam ser inteiros")
+        entrega = x.get("entrega") or {}
+        if not data_ok(entrega.get("em"), opcional=True):
+            problemas.append(f"{nome}: 'entrega.em' precisa ser AAAA-MM-DD ou null")
+        link = entrega.get("link")
+        if link is not None and not (isinstance(link, str) and link.startswith("https://")):
+            problemas.append(f"{nome}: 'entrega.link' precisa começar com https:// ou ser null")
+        avaliacao = x.get("avaliacao") or {}
+        if not data_ok(avaliacao.get("em"), opcional=True):
+            problemas.append(f"{nome}: 'avaliacao.em' precisa ser AAAA-MM-DD ou null")
+        for chave, nota in (avaliacao.get("criterios") or {}).items():
+            if chave not in criterios:
+                problemas.append(f"{nome}: o critério '{chave}' não está em 'criterios'")
+            if nota is not None and not (isinstance(nota, int) and 1 <= nota <= 5):
+                problemas.append(f"{nome}: a nota de '{chave}' precisa ser de 1 a 5 ou null")
+        if x.get("status") == "avaliada" and not any(isinstance(v, int) for v in (avaliacao.get("criterios") or {}).values()):
+            problemas.append(f"{nome}: status 'avaliada' sem nenhuma nota")
+    return problemas
 
 
 def link_valido(link: str) -> bool:
@@ -32,9 +90,13 @@ def link_valido(link: str) -> bool:
 
 def verificar(g: dict) -> list[str]:
     problemas: list[str] = []
-    for campo in ("titulo", "perfil", "maria", "regras", "modulos", "glossario", "repositorio_maria", "jogadora", "xp", "niveis"):
+    for campo in ("titulo", "perfil", "maria", "regras", "modulos", "glossario", "repositorio_maria", "repositorio_guia", "jogadora", "xp", "niveis"):
         if campo not in g:
             problemas.append(f"falta '{campo}' no topo")
+    if not re.match(r"^[\w.-]+/[\w.-]+$", str(g.get("repositorio_guia", ""))):
+        problemas.append("repositorio_guia precisa ser 'dono/repositorio'")
+    if not re.match(r"^[A-Za-z0-9-]+$", str(g.get("jogadora", {}).get("github", ""))):
+        problemas.append("jogadora: falta o 'github' (login de quem envia o progresso)")
     for tipo in ("estudar", "checar", "praticar", "tarefa", "pronto", "quiz"):
         if not isinstance(g.get("xp", {}).get(tipo), int):
             problemas.append(f"xp: falta o valor de '{tipo}'")
@@ -79,13 +141,14 @@ def verificar(g: dict) -> list[str]:
 
 def main() -> int:
     g = carregar()
-    problemas = verificar(g)
+    t = carregar(ARQUIVO_TAREFAS, "window.TAREFAS =")
+    problemas = verificar(g) + verificar_tarefas(t, {m.get("id") for m in g.get("modulos", [])})
     if problemas:
         print("Problemas encontrados:")
         for p in problemas:
             print(" -", p)
         return 1
-    print(f"OK: {len(g['modulos'])} módulos, {len(g['regras'])} regras, {len(g['glossario'])} termos no glossário.")
+    print(f"OK: {len(g['modulos'])} módulos, {len(g['regras'])} regras, {len(g['glossario'])} termos no glossário, {len(t['tarefas'])} tarefas lançadas.")
     return 0
 
 

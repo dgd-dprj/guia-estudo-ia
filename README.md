@@ -35,11 +35,66 @@ python -m http.server 8000
 
 E abra `http://localhost:8000`.
 
+## O menu
+
+Cada botão do menu tem o ícone e o nome:
+
+| Botão | O que tem |
+|---|---|
+| 🗺️ Mapa | O mapa das fases e, embaixo, a legenda com o nome e o % de cada fase |
+| ✅ Tarefas | As tarefas lançadas pela Nicole e pelo Ícaro, com prazo, status e avaliação |
+| 📊 Painel | O painel da equipe, com o desempenho no estudo e nas tarefas |
+| 🎒 Inventário | Os poderes que a Marcelle já tem, o envio do progresso e a cópia de segurança |
+| 🏅 Conquistas | Insígnias das fases e níveis |
+| 📘 Maria | O livro da Maria: camadas, ambientes e por onde começar a ler |
+| 📜 Regras | As regras da equipe |
+| 📖 Glossário | As palavras que aparecem no dia a dia |
+
 ## O progresso
 
 - **Onde fica:** as caixas marcadas e as anotações ficam salvas **no navegador** de quem estuda, e não neste repositório.
-- **Para mandar à Nicole ou trocar de computador:** use **"Baixar meu progresso"**, que gera um arquivo `.json`, e **"Carregar progresso"** do outro lado.
-- **Cuidado:** limpar os dados do navegador apaga o progresso. Baixe o arquivo de vez em quando.
+- **Para a equipe acompanhar:** no Inventário, **"📤 Enviar progresso"** abre uma issue neste repositório, já preenchida, com o título `[progresso] Marcelle — data`. É só confirmar no GitHub.
+  - O envio leva só contagens: XP, nível, dias com avanço, o XP de cada dia e, por fase, o que foi marcado e os acertos do quiz.
+  - **Não leva as anotações do diário.**
+  - A issue é pública e é fechada na hora pelo workflow `organizar-envios`, com a etiqueta `progresso`.
+- **Para trocar de computador:** use **"💾 Salvar progresso"**, que gera um arquivo `.json`, e **"📂 Carregar"** do outro lado.
+- **Cuidado:** limpar os dados do navegador apaga o progresso. Envie ou salve de vez em quando.
+
+## As tarefas
+
+As tarefas ficam em `dados/tarefas.js`, em JSON, dentro de `window.TAREFAS = { ... };`.
+
+- **Para lançar:** copie um item da lista `tarefas`, troque o `id` (T2, T3...) e preencha os campos.
+
+  | Campo | O que é |
+  |---|---|
+  | `id`, `titulo`, `descricao` | Identificação e o que fazer |
+  | `fase` | O módulo ligado (`m0` a `m10`) |
+  | `issues_maria` | Números das issues da Maria, se houver |
+  | `lancada_por`, `lancada_em`, `prazo` | Quem lançou, quando e até quando (datas `AAAA-MM-DD`) |
+  | `status` | `lancada`, `em_andamento`, `entregue`, `refazer` ou `avaliada` |
+  | `entrega` | `em` (data), `link` (PR ou issue, `https://`) e `observacao` |
+  | `avaliacao` | `por` (quem avaliou), `em`, uma nota de 1 a 5 para cada critério e `comentario` |
+
+- **Critérios:** qualidade da entrega, testes, prazo, comunicação e autonomia. Os nomes ficam em `criterios`, no mesmo arquivo.
+- **Entrega:** na página de tarefas, a Marcelle usa **"📬 Avisar entrega"**, que abre uma issue `[entrega] T1 — título` com a etiqueta `entrega`. Depois, a Nicole ou o Ícaro atualizam a tarefa no arquivo, com a data, o link e a avaliação.
+
+## O painel da equipe
+
+O **📊 Painel** lê, pela API pública do GitHub, as issues `[progresso]` e `[entrega]` abertas pela Marcelle (login em `jogadora.github`). Issues de outras pessoas são ignoradas.
+
+Ele mostra:
+
+- **Resumo:** nível, % da jornada, estudo, acerto do quiz na 1ª tentativa, prática, tarefas entregues e atrasadas, avaliação média, ritmo em XP por semana com a previsão de término e constância (dias com avanço e sequência).
+- **Evolução do XP:** linha do XP acumulado por dia, com as faixas de nível. Tem a versão em tabela.
+- **Dias de estudo:** calendário das últimas 12 semanas, com o XP de cada dia.
+- **Detalhe por fase:** progresso, baú, perguntas para pensar, quiz (1ª tentativa e agora), treino, missão, critérios de pronto, XP e data de conclusão.
+- **Tarefas lançadas:** prazo, status, situação (no prazo, atrasada) e a avaliação por critério.
+- **Envios:** a lista das issues de progresso.
+
+Sem envio, o painel mostra o progresso guardado no próprio navegador. O botão **"💻 Este navegador"** troca para ele a qualquer momento.
+
+O GitHub aceita 60 consultas por hora sem login, por rede. Se passar disso, o painel avisa e é só tentar de novo mais tarde.
 
 ## Como editar o conteúdo
 
@@ -61,10 +116,13 @@ Todo o conteúdo está em `dados/guia.js`, em JSON, dentro de `window.GUIA = { .
 | `estilo.css` | O visual, com tema claro e escuro automático |
 | `app.js` | Monta as páginas a partir dos dados e guarda o progresso |
 | `dados/guia.js` | Perfil, mapa da Maria, regras, módulos e glossário |
-| `scripts/verificar_dados.py` | Confere os dados antes de abrir |
+| `dados/tarefas.js` | Tarefas lançadas pela equipe, com prazo, entrega e avaliação |
+| `scripts/verificar_dados.py` | Confere os dois arquivos de dados antes de abrir |
+| `.github/workflows/organizar-envios.yml` | Etiqueta as issues de progresso e de entrega |
 
 ## Privacidade
 
 - Este guia não guarda dado pessoal de ninguém.
+- O progresso enviado e as avaliações das tarefas ficam **públicos**, neste repositório. Foi uma decisão da equipe.
 - As tarefas usam **só dados inventados**. As regras da equipe estão na página "Regras da equipe".
 - Não coloque chave, senha ou dado de assistido neste repositório.
