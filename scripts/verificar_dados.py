@@ -22,6 +22,7 @@ CAMPOS_MODULO = ["id", "semana", "titulo", "objetivo", "ponte", "tempo", "estuda
 CAMPOS_TAREFA = ["titulo", "issues", "descricao", "onde", "como_testar", "cuidado"]
 CAMPOS_TAREFA_LANCADA = ["id", "titulo", "fase", "descricao", "lancada_por", "lancada_em", "prazo", "status", "entrega", "avaliacao"]
 STATUS = {"lancada", "em_andamento", "entregue", "refazer", "avaliada"}
+PRIORIDADES = {"maxima", "alta", "normal"}
 DATA = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
@@ -69,6 +70,14 @@ def verificar_tarefas(t: dict, ids_modulo: set[str]) -> list[str]:
             problemas.append(f"{nome}: 'urgente' precisa ser true ou false")
         if x.get("prazo_hora") is not None and not re.match(r"^([01]\d|2[0-3]):[0-5]\d$", str(x["prazo_hora"])):
             problemas.append(f"{nome}: 'prazo_hora' precisa ser HH:MM")
+        if "prioridade" in x and x["prioridade"] not in PRIORIDADES:
+            problemas.append(f"{nome}: 'prioridade' precisa ser um de {sorted(PRIORIDADES)}")
+        for dep in x.get("depende_de", []):
+            if dep not in ids or dep == x.get("id"):
+                problemas.append(f"{nome}: 'depende_de' cita '{dep}', que não é outra tarefa da lista")
+        for i in x.get("identificadores", []):
+            if not all(isinstance(i.get(c), str) and i[c].strip() for c in ("nome", "onde", "como")):
+                problemas.append(f"{nome}: cada identificador precisa de 'nome', 'onde' e 'como'")
         for c in x.get("casos_teste", []):
             if not c.get("relato") or not c.get("esperado"):
                 problemas.append(f"{nome}: cada caso de teste precisa de 'relato' e 'esperado'")

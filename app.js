@@ -348,6 +348,14 @@
         el("a", { classe: "botao secundario", href: "#/inicio/salvar", texto: "💾 Como salva" }),
       ])),
       (() => {
+        const varias = tarefasPrioritarias();
+        if (varias.length > 1) {
+          const s = situacaoPrazo(varias[0], hoje());
+          return el("a", { classe: "faixa-urgente", href: "#/tarefas" }, [
+            el("strong", { texto: "🚨 " + varias.length + " tarefas de prioridade máxima: " + varias.map((t) => t.id).join(", ") }),
+            el("span", { texto: s.texto + " · Abrir ▶" }),
+          ]);
+        }
         const u = tarefaUrgente();
         if (!u) return null;
         const s = situacaoPrazo(u, hoje());
@@ -632,6 +640,66 @@
   const horaPrazo = (t) => (/^\d{2}:\d{2}$/.test(t.prazo_hora || "") ? t.prazo_hora : null);
   const textoPrazo = (t) => dataLonga(t.prazo) + (horaPrazo(t) ? " às " + horaPrazo(t) : "");
   const tarefaUrgente = () => (T.tarefas || []).find((t) => t.urgente && !foiEntregue(t));
+  const PRIORIDADES = { maxima: "🔺 Prioridade máxima", alta: "▲ Prioridade alta", normal: "Prioridade normal" };
+  // As tarefas em aberto que pedem pressa: as urgentes e as de prioridade máxima.
+  const tarefasPrioritarias = () => (T.tarefas || []).filter((t) => (t.urgente || t.prioridade === "maxima") && !foiEntregue(t));
+
+  // ── Salvar em arquivo: para passar a tarefa adiante (por exemplo, ao Ícaro) ──
+  // O arquivo leva a tarefa inteira, os passos marcados, o que foi escrito na entrega e o que falta.
+  function baixarArquivo(nome, texto) {
+    const arquivo = new Blob([texto], { type: "text/markdown;charset=utf-8" });
+    const a = el("a", { href: URL.createObjectURL(arquivo), download: nome });
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  }
+  function textoDaTarefa(t) {
+    const salvo = progresso.tarefas[t.id] || { feitos: {}, respostas: {} };
+    const passos = Array.isArray(t.passos) ? t.passos : [];
+    const feitos = passos.filter((_, i) => salvo.feitos[i]).length;
+    const linhas = ["# " + t.id + " — " + t.titulo, ""];
+    linhas.push("- Prazo: " + textoPrazo(t) + (t.prioridade ? " · " + (PRIORIDADES[t.prioridade] || t.prioridade) : ""));
+    if (Array.isArray(t.depende_de) && t.depende_de.length) linhas.push("- Depende de: " + t.depende_de.join(", "));
+    if ((t.issues_maria || []).length) linhas.push("- Issues da Maria: " + t.issues_maria.map((n) => "#" + n).join(", "));
+    linhas.push("- Passos feitos: " + feitos + " de " + passos.length, "", t.descricao || "");
+    if (t.objetivo) linhas.push("", "## Objetivo", "", t.objetivo);
+    if (t.contexto) linhas.push("", "## Para entender", "", t.contexto);
+    if (Array.isArray(t.identificadores) && t.identificadores.length) {
+      linhas.push("", "## Identificadores", "", "| Identificador | Onde aparece | Como reconhecer e o que fazer |", "|---|---|---|");
+      t.identificadores.forEach((x) => linhas.push("| `" + x.nome + "` | " + x.onde + " | " + x.como + " |"));
+    }
+    if (passos.length) {
+      linhas.push("", "## Passo a passo", "");
+      passos.forEach((p, i) => linhas.push("- [" + (salvo.feitos[i] ? "x" : " ") + "] " + (i + 1) + ". " + p));
+      const faltam = passos.map((p, i) => [p, i]).filter(([, i]) => !salvo.feitos[i]);
+      linhas.push("", "## O que falta", "", faltam.length ? faltam.map(([p, i]) => "- " + (i + 1) + ". " + p).join("\n") : "Nada: todos os passos foram marcados.");
+    }
+    const campos = Array.isArray(t.campos_entrega) ? t.campos_entrega : [];
+    if (campos.length) {
+      linhas.push("", "## O que foi anotado");
+      campos.forEach((c) => linhas.push("", "### " + c.rotulo, "", (salvo.respostas[c.id] || "").trim() || "(não preenchido)"));
+    }
+    if (Array.isArray(t.casos_teste) && t.casos_teste.length) {
+      linhas.push("", "## Casos para testar", "");
+      t.casos_teste.forEach((c, i) => linhas.push((i + 1) + ". Relato: \"" + c.relato + "\"  ", "   Esperado: " + c.esperado));
+    }
+    if (Array.isArray(t.pronto_quando) && t.pronto_quando.length) linhas.push("", "## Pronto quando", "", ...t.pronto_quando.map((x) => "- " + x));
+    if (Array.isArray(t.cuidados) && t.cuidados.length) linhas.push("", "## Cuidados", "", ...t.cuidados.map((x) => "- " + x));
+    return linhas.join("\n");
+  }
+  function cabecalhoDoArquivo() {
+    const agora = new Date();
+    return "Gerado pela Jornada IA em " + dataLonga(hoje()) + " às " + String(agora.getHours()).padStart(2, "0") + ":" + String(agora.getMinutes()).padStart(2, "0") +
+      ".\nSem dados pessoais de assistidos e sem chaves.\n\n";
+  }
+  function botaoSalvarArquivo(t) {
+    const b = el("button", { type: "button", classe: "botao secundario", texto: "💾 Salvar em arquivo (para o Ícaro)" });
+    b.addEventListener("click", () => {
+      baixarArquivo(t.id + "-para-o-icaro.md", cabecalhoDoArquivo() + textoDaTarefa(t) + "\n");
+      avisar("💾 Arquivo salvo: mande para o Ícaro terminar", true);
+    });
+    return b;
+  }
   function situacaoPrazo(t, ref) {
     if (!dataValida(t.prazo)) return { texto: "sem prazo", classe: "neutro", atraso: 0 };
     const em = t.entrega && dataValida(t.entrega.em) ? t.entrega.em : null;
@@ -728,7 +796,8 @@
       t.entregavel ? el("p", { texto: t.entregavel }) : null,
       ...areas,
       el("p", { classe: "meta", texto: "O que você escreve aqui fica salvo neste navegador. O botão abre o GitHub com tudo preenchido, incluindo os passos que você marcou: é só conferir e confirmar." }),
-      el("div", { classe: "acoes" }, [enviar]),
+      el("p", { classe: "meta", texto: "Não deu para terminar? \"💾 Salvar em arquivo\" baixa a tarefa com os passos marcados, o que você anotou e o que falta. Mande o arquivo ao Ícaro para ele terminar a parte da Tykhe." }),
+      el("div", { classe: "acoes" }, [enviar, botaoSalvarArquivo(t)]),
     ]);
   }
   function listaPassos(t, passos, aoMudar) {
@@ -765,6 +834,7 @@
       el("div", { classe: "tarefa-topo" }, [
         el("span", { classe: "tarefa-id", texto: t.id }), el("h3", { texto: t.titulo }),
         t.urgente && !foiEntregue(t) ? el("span", { classe: "selo critico", texto: "🚨 Urgente" }) : null,
+        t.prioridade && PRIORIDADES[t.prioridade] && t.prioridade !== "normal" ? el("span", { classe: "selo critico", texto: PRIORIDADES[t.prioridade] }) : null,
         seloStatus(t.status),
       ]),
       el("p", { texto: t.descricao }),
@@ -775,10 +845,16 @@
         ficha("Issues da Maria", issuesDaMaria(t.issues_maria)),
         ficha("Entrega", entrega.link ? linkSeguro("abrir a entrega", entrega.link) : dataValida(entrega.em) ? dataLonga(entrega.em) : "—"),
         t.tempo ? ficha("Tempo estimado", t.tempo) : null,
+        Array.isArray(t.depende_de) && t.depende_de.length ? ficha("Depende de", "fazer antes: " + t.depende_de.join(", ")) : null,
       ]),
       entrega.observacao ? el("p", { classe: "meta" }, ["📝 ", entrega.observacao]) : null,
       t.objetivo ? bloco("🎯 Objetivo", el("p", { texto: t.objetivo })) : null,
       t.contexto ? bloco("🧭 Para entender", el("p", { texto: t.contexto })) : null,
+      Array.isArray(t.identificadores) && t.identificadores.length ? bloco("🔑 Identificadores", el("div", {}, [
+        el("p", { classe: "meta", texto: "Os nomes exatos que aparecem na Maria e na Tykhe. Use para saber qual resposta é qual e o que fazer com ela." }),
+        tabelaSimples(["Identificador", "Onde aparece", "Como reconhecer e o que fazer"],
+          t.identificadores.map((x) => [el("code", { texto: x.nome }), x.onde, x.como]), "identificadores"),
+      ])) : null,
       passos.length ? bloco("🪜 Passo a passo ", el("div", {}, [
         el("p", { classe: "meta", texto: "Marque cada passo quando terminar. Fica salvo neste navegador e vai junto na entrega." }),
         listaPassos(t, passos, contar),
@@ -803,14 +879,23 @@
     const lista = T.tarefas || [];
     const abertas = lista.filter((t) => !foiEntregue(t)).length;
     const urgente = tarefaUrgente();
+    const prioritarias = tarefasPrioritarias();
     const fala = !lista.length ? "Ainda não há tarefas lançadas. Quando a Nicole ou o Ícaro lançarem, elas aparecem aqui."
+      : prioritarias.length > 1 ? "🚨 Você tem " + prioritarias.length + " tarefas de prioridade máxima: " + prioritarias.map((t) => t.id).join(", ") +
+        ".\nPrazo: " + textoPrazo(prioritarias[0]) + ". Faça na ordem, uma de cada vez.\nNão deu para terminar? Salve em arquivo e mande ao Ícaro."
       : urgente ? "🚨 Tarefa urgente: " + urgente.id + " — " + urgente.titulo + ".\nPrazo: " + textoPrazo(urgente) + ". Comece por ela!"
         : "Estas são as tarefas que a Nicole e o Ícaro lançaram para você.\n" + (abertas ? "Em aberto: " + abertas + ". Ao terminar, use \"Enviar entrega\"." : "Tudo entregue! 🎉");
     // Urgente em aberto primeiro; depois as abertas pelo prazo; as entregues no fim.
     const ordem = (t) => (foiEntregue(t) ? 2 : t.urgente ? 0 : 1);
     const ordenadas = lista.slice().sort((a, b) => ordem(a) - ordem(b) || String(a.prazo || "9").localeCompare(String(b.prazo || "9")));
+    const salvarTodas = el("button", { type: "button", classe: "botao", texto: "💾 Salvar todas as tarefas em aberto num arquivo (para o Ícaro)" });
+    salvarTodas.addEventListener("click", () => {
+      const abertasLista = ordenadas.filter((t) => !foiEntregue(t));
+      baixarArquivo("tarefas-em-aberto-para-o-icaro.md", cabecalhoDoArquivo() + abertasLista.map(textoDaTarefa).join("\n\n---\n\n") + "\n");
+      avisar("💾 Arquivo salvo com " + plural(abertasLista.length, "tarefa", "tarefas") + ": mande para o Ícaro", true);
+    });
     return [
-      dialogo(fala),
+      dialogo(fala, abertas ? el("div", { classe: "acoes" }, [salvarTodas]) : null),
       el("div", { classe: "legenda" }, Object.values(STATUS).map((s) => el("span", { classe: "selo " + s.classe, texto: s.icone + " " + s.nome }))),
       ...ordenadas.map(cartaoTarefa),
       el("details", { classe: "como-lancar" }, [
