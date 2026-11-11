@@ -816,7 +816,25 @@
       return li;
     }));
   }
-  function cartaoTarefa(t) {
+  // Cartões minimizados: preferência de quem vê, só neste navegador (não vai no progresso nem no envio).
+  const CHAVE_MINIMIZADAS = "guia-ia-tarefas-minimizadas";
+  function lerMinimizadas() {
+    try { return JSON.parse(localStorage.getItem(CHAVE_MINIMIZADAS) || "{}") || {}; } catch (e) { return {}; }
+  }
+  function guardarMinimizada(id, minimizada) {
+    const m = lerMinimizadas();
+    m[id] = minimizada;
+    try { localStorage.setItem(CHAVE_MINIMIZADAS, JSON.stringify(m)); } catch (e) { /* segue sem guardar */ }
+  }
+  function aplicarMinimizada(cartao, minimizada) {
+    cartao.classList.toggle("minimizada", minimizada);
+    const botao = cartao.querySelector(".botao-minimizar");
+    if (botao) {
+      botao.textContent = minimizada ? "▸ Abrir" : "▾ Minimizar";
+      botao.setAttribute("aria-expanded", minimizada ? "false" : "true");
+    }
+  }
+  function cartaoTarefa(t, abertaPorPadrao) {
     const prazo = situacaoPrazo(t, hoje());
     const detalhes = Array.isArray(t.issues_detalhe) ? t.issues_detalhe : [];
     const passos = Array.isArray(t.passos) ? t.passos : [];
@@ -825,18 +843,27 @@
     const lista = (itens, ordenada) => el(ordenada ? "ol" : "ul", { classe: "tarefa-lista" }, itens.map((x) => el("li", { texto: x })));
     const bloco = (titulo, conteudo, extra) => el("section", { classe: "tarefa-bloco" }, [el("h4", {}, [titulo, extra || null]), conteudo]);
     const contagem = el("span", { classe: "xp-tag" });
+    const contagemTopo = el("span", { classe: "xp-tag" });
     const contar = () => {
       const s = progresso.tarefas[t.id] || { feitos: {} };
-      contagem.textContent = passos.filter((_, i) => s.feitos[i]).length + "/" + passos.length + " feitos";
+      contagem.textContent = contagemTopo.textContent = passos.filter((_, i) => s.feitos[i]).length + "/" + passos.length + " feitos";
     };
     contar();
-    return el("article", { classe: "painel tarefa-cartao" + (t.urgente && !foiEntregue(t) ? " urgente" : "") }, [
+    const corpoId = "corpo-" + t.id;
+    const minimizar = el("button", { type: "button", classe: "botao secundario botao-minimizar", "aria-controls": corpoId });
+    const salvas = lerMinimizadas();
+    const minimizada = t.id in salvas ? !!salvas[t.id] : !abertaPorPadrao;
+    const cartao = el("article", { classe: "painel tarefa-cartao" + (t.urgente && !foiEntregue(t) ? " urgente" : "") }, [
       el("div", { classe: "tarefa-topo" }, [
         el("span", { classe: "tarefa-id", texto: t.id }), el("h3", { texto: t.titulo }),
         t.urgente && !foiEntregue(t) ? el("span", { classe: "selo critico", texto: "🚨 Urgente" }) : null,
         t.prioridade && PRIORIDADES[t.prioridade] && t.prioridade !== "normal" ? el("span", { classe: "selo critico", texto: PRIORIDADES[t.prioridade] }) : null,
         seloStatus(t.status),
+        minimizar,
       ]),
+      // Visível só com o cartão minimizado: o prazo e os passos feitos.
+      el("p", { classe: "tarefa-resumo" }, [textoPrazo(t) + " ", el("span", { classe: "prazo " + prazo.classe, texto: prazo.texto }), " ", passos.length ? contagemTopo : null]),
+      el("div", { classe: "tarefa-corpo", id: corpoId }, [
       el("p", { texto: t.descricao }),
       el("dl", { classe: "fichas" }, [
         ficha("Fase", t.fase ? linkSeguro(nomeFase(t.fase), "#/modulo/" + t.fase + "/6") : "—"),
@@ -873,7 +900,16 @@
       foiEntregue(t) ? (t.entregavel ? bloco("📦 O que foi pedido", el("p", { texto: t.entregavel })) : null) : blocoEntrega(t, passos),
       el("h4", { texto: "⭐ Avaliação" }),
       blocoAvaliacao(t),
+      ]),
     ]);
+    cartao.dataset.tarefa = t.id;
+    minimizar.addEventListener("click", () => {
+      const agora = !cartao.classList.contains("minimizada");
+      aplicarMinimizada(cartao, agora);
+      guardarMinimizada(t.id, agora);
+    });
+    aplicarMinimizada(cartao, minimizada);
+    return cartao;
   }
   function paginaTarefas() {
     const lista = T.tarefas || [];
@@ -894,10 +930,23 @@
       baixarArquivo("tarefas-em-aberto-para-o-icaro.md", cabecalhoDoArquivo() + abertasLista.map(textoDaTarefa).join("\n\n---\n\n") + "\n");
       avisar("💾 Arquivo salvo com " + plural(abertasLista.length, "tarefa", "tarefas") + ": mande para o Ícaro", true);
     });
+    // Ao abrir a página, só a próxima tarefa em aberto fica aberta; as outras começam minimizadas.
+    const proxima = ordenadas.find((t) => !foiEntregue(t));
+    const todas = (minimizada) => {
+      document.querySelectorAll(".tarefa-cartao").forEach((c) => {
+        aplicarMinimizada(c, minimizada);
+        guardarMinimizada(c.dataset.tarefa, minimizada);
+      });
+    };
+    const minimizarTodas = el("button", { type: "button", classe: "botao secundario", texto: "▸ Minimizar todas" });
+    minimizarTodas.addEventListener("click", () => todas(true));
+    const abrirTodas = el("button", { type: "button", classe: "botao secundario", texto: "▾ Abrir todas" });
+    abrirTodas.addEventListener("click", () => todas(false));
     return [
       dialogo(fala, abertas ? el("div", { classe: "acoes" }, [salvarTodas]) : null),
       el("div", { classe: "legenda" }, Object.values(STATUS).map((s) => el("span", { classe: "selo " + s.classe, texto: s.icone + " " + s.nome }))),
-      ...ordenadas.map(cartaoTarefa),
+      lista.length ? el("div", { classe: "acoes acoes-tarefas" }, [minimizarTodas, abrirTodas]) : null,
+      ...ordenadas.map((t) => cartaoTarefa(t, proxima && t.id === proxima.id)),
       el("details", { classe: "como-lancar" }, [
         el("summary", { texto: "🧭 Como lançar uma tarefa (Nicole e Ícaro)" }),
         el("p", { texto: T.explicacao || "" }),
@@ -1318,4 +1367,65 @@
   document.title = G.titulo;
   window.addEventListener("hashchange", render);
   render();
+
+  // ── Avisos de atualização ─────────────────────────────────────────────────────
+  // 1) Novidades (dados/novidades.js): as entradas que a jogadora ainda não viu aparecem numa faixa no topo.
+  // 2) Versão nova publicada: a publicação grava versao.json. Com a página aberta, ela confere a cada 5 minutos
+  //    e quando a aba volta a ficar visível; se mudou, pede para atualizar a tela.
+  const faixa = document.getElementById("faixa-atualizacao");
+  const N = window.NOVIDADES || { lista: [] };
+  const CHAVE_VISTAS = "guia-ia-novidades-vistas";
+  let versaoCarregada = null;
+  let versaoNova = false;
+  function lerVistas() {
+    try { const v = JSON.parse(localStorage.getItem(CHAVE_VISTAS) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; }
+  }
+  function marcarVistas(ids) {
+    const v = new Set(lerVistas());
+    ids.forEach((i) => v.add(i));
+    try { localStorage.setItem(CHAVE_VISTAS, JSON.stringify([...v])); } catch (e) { /* segue sem guardar */ }
+  }
+  function mostrarFaixa() {
+    if (!faixa) return;
+    const vistas = new Set(lerVistas());
+    const novas = (N.lista || []).filter((n) => n && n.id && !vistas.has(n.id));
+    const partes = [];
+    if (versaoNova) {
+      const atualizar = el("button", { type: "button", classe: "botao", texto: "🔄 Atualizar a tela" });
+      atualizar.addEventListener("click", () => location.reload());
+      partes.push(el("div", { classe: "faixa-linha" }, [
+        el("strong", { texto: "🔄 O guia foi atualizado agora." }),
+        el("span", { texto: " Atualize a tela para ver as mudanças. O que você marcou e escreveu continua salvo." }),
+        atualizar,
+      ]));
+    }
+    if (novas.length) {
+      const entendi = el("button", { type: "button", classe: "botao secundario", texto: "✓ Entendi" });
+      entendi.addEventListener("click", () => { marcarVistas(novas.map((n) => n.id)); mostrarFaixa(); });
+      partes.push(el("div", { classe: "faixa-novidades" }, [
+        el("strong", { texto: "🔔 Novidades no guia" }),
+        el("ul", {}, novas.map((n) => el("li", {}, [
+          el("strong", { texto: dataCurta(n.em) + ": " + n.titulo }), n.texto ? el("span", { texto: " " + n.texto }) : null,
+          n.link ? el("span", {}, [" ", linkSeguro("Abrir ▶", n.link)]) : null,
+        ]))),
+        entendi,
+      ]));
+    }
+    faixa.replaceChildren(...partes);
+    faixa.hidden = !partes.length;
+  }
+  async function conferirVersao() {
+    try {
+      const r = await fetch("versao.json?t=" + Date.now(), { cache: "no-store" });
+      if (!r.ok) return;
+      const v = (await r.json()).versao;
+      if (!v) return;
+      if (versaoCarregada === null) versaoCarregada = v;
+      else if (v !== versaoCarregada && !versaoNova) { versaoNova = true; mostrarFaixa(); }
+    } catch (e) { /* aberto sem a publicação (arquivo local): sem conferência */ }
+  }
+  mostrarFaixa();
+  conferirVersao();
+  setInterval(conferirVersao, 5 * 60 * 1000);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") conferirVersao(); });
 })();

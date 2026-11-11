@@ -118,6 +118,25 @@ def verificar_tarefas(t: dict, ids_modulo: set[str]) -> list[str]:
     return problemas
 
 
+def verificar_novidades(n: dict) -> list[str]:
+    problemas: list[str] = []
+    lista = n.get("lista")
+    if not isinstance(lista, list):
+        return ["novidades.js: falta a 'lista'"]
+    ids = [x.get("id") for x in lista]
+    if len(ids) != len(set(ids)) or not all(ids):
+        problemas.append("novidades.js: cada novidade precisa de 'id' único")
+    for x in lista:
+        nome = f"novidade {x.get('id', '?')}"
+        if not data_ok(x.get("em")):
+            problemas.append(f"{nome}: 'em' precisa ser AAAA-MM-DD")
+        if not (isinstance(x.get("titulo"), str) and x["titulo"].strip()):
+            problemas.append(f"{nome}: falta 'titulo'")
+        if x.get("link") and not link_valido(x["link"]):
+            problemas.append(f"{nome}: 'link' precisa começar com https:// ou #/")
+    return problemas
+
+
 def link_valido(link: str) -> bool:
     return isinstance(link, str) and (link.startswith("https://") or link.startswith("#/"))
 
@@ -176,7 +195,8 @@ def verificar(g: dict) -> list[str]:
 def main() -> int:
     g = carregar()
     t = carregar(ARQUIVO_TAREFAS, "window.TAREFAS =")
-    problemas = verificar(g) + verificar_tarefas(t, {m.get("id") for m in g.get("modulos", [])})
+    n = carregar(DADOS / "novidades.js", "window.NOVIDADES =")
+    problemas = verificar(g) + verificar_tarefas(t, {m.get("id") for m in g.get("modulos", [])}) + verificar_novidades(n)
     if problemas:
         print("Problemas encontrados:")
         for p in problemas:

@@ -417,3 +417,20 @@ button.botao:disabled { opacity: .45; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Cartões de tarefa minimizáveis */
+.botao-minimizar { padding: 6px 10px; font-size: 14px; }
+.tarefa-resumo { display: none; margin: 10px 0 0; color: var(--texto); }
+.tarefa-cartao.minimizada .tarefa-resumo { display: block; }
+.tarefa-cartao.minimizada .tarefa-corpo { display: none; }
+.tarefa-cartao.minimizada { margin-top: 12px; }
+.acoes-tarefas { margin-top: 14px; }
+
+/* Faixa de atualização: versão nova publicada e novidades ainda não vistas */
+.faixa-atualizacao { max-width: 1040px; margin: 14px auto 0; padding: 0 18px; }
+.faixa-atualizacao > div { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 12px 16px; margin-top: 8px;
+  background: #1d3b5a; color: #fff; border: 3px solid #5fb8ff; box-shadow: 4px 4px 0 var(--borda-escura); }
+.faixa-atualizacao ul { flex-basis: 100%; margin: 4px 0; padding-left: 20px; }
+.faixa-atualizacao li { margin: 4px 0; line-height: 1.5; }
+.faixa-atualizacao a { color: #ffe27a; }
+.faixa-linha .botao { margin-left: auto; }
