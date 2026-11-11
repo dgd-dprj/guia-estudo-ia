@@ -2,6 +2,13 @@ window.NOVIDADES = {
   "explicacao": "A cada atualização do guia, acrescente uma entrada no topo da lista: id único (data e um nome curto), em (AAAA-MM-DD), titulo, texto e link (https:// ou rota interna, como #/tarefas). A página mostra à Marcelle as entradas que ela ainda não viu, e a publicação manda o aviso por email (menção no GitHub). Nunca coloque dado pessoal de assistido nem chave: este arquivo é público.",
   "lista": [
     {
+      "id": "2026-11-11-fim-da-conversa",
+      "em": "2026-11-11",
+      "titulo": "T6, T7 e T8 atualizadas: resumo no fim da conversa e botão de encerrar",
+      "texto": "O fim de cada assunto mudou de novo. Sem urgente na vez, a Maria mostra o resumo da conversa (cada assunto atendido, com o desfecho e um código), o que ainda está em aberto e a pergunta \"Quer continuar com algum desses assuntos ou encerrar a conversa?\". Saiu o botão \"Ver os assuntos em aberto\": agora vem um botão por assunto em aberto, que abre o assunto direto, mais \"Falar de um assunto novo\" e \"Encerrar a conversa\". Identificadores novos: resumoDaConversa, codigo, fase e venceEm. Se você já tinha marcado passos da T6 a T8, confira de novo.",
+      "link": "#/tarefas"
+    },
+    {
       "id": "2026-11-11-assuntos-em-aberto",
       "em": "2026-11-11",
       "titulo": "Tarefas da Tykhe atualizadas: sem CPF no começo e com os assuntos em aberto",

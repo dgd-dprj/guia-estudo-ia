@@ -545,7 +545,7 @@ window.TAREFAS = {
       "casos_teste": [
         {
           "relato": "Conversa A, com o idUsuario teste-marcelle-2: \"meu filho foi preso e eu queria saber como está o meu processo de pensão\". Toque em Sim e leve a pessoa presa até o fim.",
-          "esperado": "No fim, \"Ficou para depois: o seu processo. Vou guardar esse assunto por até 30 dias…\" e a oferta dos assuntos em aberto (os botões são da T6)."
+          "esperado": "No fim, o resumo da conversa (\"Resumo da nossa conversa: • A pessoa presa: dados confirmados e encaminhados (código …)\") e \"Ainda em aberto: • O seu processo · menos urgente · em aberto até dd/mm · ainda não começou\" (os botões são da T6)."
         },
         {
           "relato": "Conversa B, chatId novo e o mesmo idUsuario: \"queria saber como está o meu processo\"",
@@ -629,13 +629,13 @@ window.TAREFAS = {
     },
     {
       "id": "T6",
-      "titulo": "Tykhe 5/7: no fim do assunto, a urgência e os botões dos assuntos em aberto",
+      "titulo": "Tykhe 5/7: no fim do assunto, a urgência, o resumo da conversa e os botões",
       "urgente": true,
       "prioridade": "maxima",
       "fase": "m0",
-      "descricao": "Na resposta final de cada assunto, ler a urgência do próximo e, quando vierem, mostrar os botões \"Ver os assuntos em aberto\" e \"Falar de um assunto novo\".",
-      "objetivo": "O assunto urgente da conversa abre logo. Quando não há urgente na vez, a pessoa vê as pendências uma vez só, no fim, e escolhe o que fazer.",
-      "contexto": "Quando um assunto termina em concluido, a resposta final pode trazer: assuntosPendentes (os outros assuntos desta conversa, na ordem, cada um com urgencia) e, quando não há um urgente na vez, opcoesDoFim e assuntosEmAberto. O texto da resposta já avisa: \"Ainda falta um assunto urgente: … Vamos falar dele agora.\", \"Ficou para depois: …\" e \"Você tem dois assuntos em aberto. Quer ver os assuntos em aberto ou falar de um assunto novo?\". As pendências aparecem uma vez só: com um urgente na vez, elas ficam para o fim dele.",
+      "descricao": "Na resposta final de cada assunto, ler a urgência do próximo e, quando vierem, mostrar os botões de opcoesDoFim: um por assunto em aberto, \"Falar de um assunto novo\" e \"Encerrar a conversa\".",
+      "objetivo": "O assunto urgente da conversa abre logo. Quando não há urgente na vez, a pessoa vê, uma vez só e no fim, o resumo do que foi atendido e o que ainda está em aberto, e escolhe: continuar um assunto, falar de um novo ou encerrar.",
+      "contexto": "Quando um assunto termina em concluido, a resposta final pode trazer assuntosPendentes (os outros assuntos desta conversa, cada um com urgencia). Com um urgente na vez, o texto avisa \"Ainda falta um assunto urgente: … Vamos falar dele agora.\", e o fim da conversa fica para o fim dele. Sem urgente na vez, vem o fim da conversa: o texto traz \"Resumo da nossa conversa:\" (cada assunto atendido, com o desfecho e um código de 6 letras e números), \"Quer continuar com algum desses assuntos ou encerrar a conversa?\" e \"Ainda em aberto:\" (urgência, \"em aberto até dd/mm\" e a fase). Os campos: resumoDaConversa, assuntosEmAberto (só quando há) e opcoesDoFim (sempre). Sem nada em aberto, a pergunta é \"Quer falar de um assunto novo ou encerrar a conversa?\", e os botões são só esses dois.",
       "tempo": "Cerca de 2 horas",
       "issues_maria": [
         450,
@@ -663,26 +663,31 @@ window.TAREFAS = {
         },
         {
           "nome": "opcoesDoFim",
-          "onde": "Resposta final concluido, sem urgente na vez e com assunto em aberto",
-          "como": "Os dois botões: [\"Ver os assuntos em aberto\", \"Falar de um assunto novo\"]. Mostrar como botões."
+          "onde": "Resposta final concluido, sem urgente na vez",
+          "como": "Os botões, na ordem: um por assunto em aberto (por exemplo, \"O seu processo\"), \"Falar de um assunto novo\" e, por último, \"Encerrar a conversa\". Mostrar como botões; o que cada um faz está na T7."
         },
         {
           "nome": "assuntosEmAberto",
-          "onde": "Junto de opcoesDoFim",
-          "como": "A lista das pendências (nome, urgencia e chatIdAssunto, o id do assunto). Guardar numa variável; a T7 usa."
+          "onde": "Junto de opcoesDoFim, quando há assunto em aberto",
+          "como": "A lista das pendências, na ordem dos botões: nome, urgencia, chatIdAssunto (o id do assunto), codigo, fase e venceEm (a data em que o guardado vence). Guardar numa variável; a T7 usa."
         },
         {
           "nome": "chatIdAssunto",
           "onde": "Cada item de assuntosEmAberto",
           "como": "O id do assunto (por exemplo, <chatId>-assunto-2). É o que abre aquele assunto na rota do próximo assunto (T7)."
+        },
+        {
+          "nome": "resumoDaConversa",
+          "onde": "Resposta final concluido, sem urgente na vez",
+          "como": "O resumo, um item por assunto atendido: nome, desfecho e codigo. O texto já vem em resposta; o campo serve para a nota do atendimento, se quiser. O codigo (6 letras e números) leva a equipe ao assunto."
         }
       ],
       "passos": [
-        "Na cópia, no ponto em que o fluxo da Maria termina, guarde numa variável o assuntosPendentes, o opcoesDoFim e o assuntosEmAberto da resposta final.",
-        "Mostre sempre o texto do campo resposta inteiro: ele já traz os avisos e a pergunta.",
+        "Na cópia, no ponto em que o fluxo da Maria termina, guarde numa variável o assuntosPendentes, o opcoesDoFim, o assuntosEmAberto e o resumoDaConversa da resposta final.",
+        "Mostre sempre o texto do campo resposta inteiro: ele já traz o resumo, o que está em aberto e a pergunta.",
         "Crie a condição: status concluido e assuntosPendentes[0].urgencia igual a \"urgente\". Nesse caminho, siga para \"abrir o próximo\" (T7).",
-        "Crie a condição: status concluido e opcoesDoFim existe. Nesse caminho, mostre os dois botões. \"Ver os assuntos em aberto\" e \"Falar de um assunto novo\" seguem na T7.",
-        "Sem urgente e sem opcoesDoFim, encerre como hoje.",
+        "Crie a condição: status concluido e opcoesDoFim existe. Nesse caminho, mostre um botão para cada item de opcoesDoFim, na ordem. O que cada botão faz segue na T7.",
+        "Sem urgente e sem opcoesDoFim (atendimento que não passou pelo orquestrador), encerre como hoje.",
         "Com status handoff_humano, não abra nada: escreva os nomes de assuntosPendentes na nota para o atendimento humano.",
         "Rode os casos abaixo e anote o chatId de cada um.",
         "Terminou? Preencha os campos da seção \"Entrega\" e clique em \"📬 Enviar entrega\".",
@@ -691,11 +696,11 @@ window.TAREFAS = {
       "casos_teste": [
         {
           "relato": "meu filho foi preso e eu queria saber como está o meu processo de pensão (Sim; leve a pessoa presa até o fim)",
-          "esperado": "Fim concluido com \"Ficou para depois: o seu processo.\" e \"Você tem um assunto em aberto. Quer ver o assunto em aberto ou falar de um assunto novo?\". Vêm opcoesDoFim e assuntosEmAberto: aparecem os dois botões."
+          "esperado": "Fim concluido com \"Resumo da nossa conversa: • A pessoa presa: dados confirmados e encaminhados (código …)\", \"Quer continuar com algum desses assuntos ou encerrar a conversa?\" e \"Ainda em aberto: • O seu processo · menos urgente · em aberto até dd/mm · ainda não começou\". Aparecem três botões: \"O seu processo\", \"Falar de um assunto novo\" e \"Encerrar a conversa\"."
         },
         {
           "relato": "meu marido me ameaçou ontem e meu irmão foi preso semana passada (Sim; leve o 1º assunto até o fim)",
-          "esperado": "Se o 1º terminar em concluido: \"Ainda falta um assunto urgente: a pessoa presa. Vamos falar dele agora.\", sem os botões, e a Tykhe segue para \"abrir o próximo\". Os botões vêm no fim da pessoa presa, se houver assunto em aberto."
+          "esperado": "Se o 1º terminar em concluido: \"Ainda falta um assunto urgente: a pessoa presa. Vamos falar dele agora.\", sem resumo e sem botões, e a Tykhe segue para \"abrir o próximo\". O resumo (com os dois assuntos) e os botões vêm no fim da pessoa presa. A violência doméstica aparece como \"a situação que você contou\", sem a palavra violência."
         },
         {
           "relato": "meu irmão foi preso e o plano negou a cirurgia da minha mãe (Sim; no plano, responda 3 vezes sem mandar a foto da carteirinha)",
@@ -705,7 +710,7 @@ window.TAREFAS = {
       "campos_entrega": [
         {
           "id": "caso1",
-          "rotulo": "Caso 1 (botões das pendências): chatId e o que aconteceu"
+          "rotulo": "Caso 1 (resumo e botões): chatId e o que aconteceu"
         },
         {
           "id": "caso2",
@@ -723,7 +728,7 @@ window.TAREFAS = {
       "entregavel": "Preencha os campos da seção \"Entrega\" com o chatId e o resultado de cada caso e o que ficou faltando.",
       "pronto_quando": [
         "Com concluido e um urgente na vez, o fluxo segue para \"abrir o próximo\", sem botões.",
-        "Com opcoesDoFim, os dois botões aparecem.",
+        "Com opcoesDoFim, aparece um botão por item, com \"Encerrar a conversa\" por último.",
         "Com handoff_humano, nada abre, e os nomes vão na nota.",
         "A mensagem final aparece inteira para a pessoa."
       ],
@@ -758,13 +763,13 @@ window.TAREFAS = {
     },
     {
       "id": "T7",
-      "titulo": "Tykhe 6/7: abrir o próximo assunto, a lista do fim e o assunto novo",
+      "titulo": "Tykhe 6/7: abrir o próximo assunto, os botões do fim e o encerrar",
       "urgente": true,
       "prioridade": "maxima",
       "fase": "m0",
-      "descricao": "Ligar os caminhos que saem do fim do assunto: o urgente abre pela rota do próximo assunto; \"Ver os assuntos em aberto\" mostra a lista e abre o escolhido; \"Falar de um assunto novo\" começa outra conversa.",
-      "objetivo": "A pessoa resolve o que ainda falta sem repetir o que já contou, escolhendo nas pendências ou começando um assunto novo.",
-      "contexto": "Quem cria o chatId de cada assunto é a Maria (<chatId>-assunto-2, -3). A Tykhe só manda o chatId da conversa. Três rotas: POST /atendimentos/proximo-assunto abre o próximo da fila ou o assunto escolhido; POST /atendimentos/assuntos-em-aberto devolve a lista \"Qual você quer resolver agora?\"; e o assunto novo é uma conversa nova no orquestrador, com chatId novo e o mesmo idUsuario.",
+      "descricao": "Ligar os caminhos que saem do fim do assunto: o urgente abre pela rota do próximo assunto; o botão de um assunto em aberto abre esse assunto; \"Falar de um assunto novo\" começa outra conversa; \"Encerrar a conversa\" fecha.",
+      "objetivo": "A pessoa resolve o que ainda falta sem repetir o que já contou, escolhendo um assunto em aberto, começando um assunto novo ou encerrando a conversa.",
+      "contexto": "Quem cria o chatId de cada assunto é a Maria (<chatId>-assunto-2, -3). A Tykhe só manda o chatId da conversa. Os botões do fim e o próximo urgente vão todos para POST /atendimentos/proximo-assunto: sem resposta, abre o próximo da fila; com \"resposta\" igual ao texto do botão, abre o assunto escolhido ou, com \"Encerrar a conversa\", fecha. O assunto novo é uma conversa nova no orquestrador, com chatId novo e o mesmo idUsuario. A rota POST /atendimentos/assuntos-em-aberto continua existindo para mostrar a lista em outro momento, mas os botões do fim não precisam dela.",
       "tempo": "Cerca de 3 horas",
       "issues_maria": [
         450,
@@ -785,23 +790,28 @@ window.TAREFAS = {
           "como": "O chatId do assunto aberto. Use esse daí em diante, em todas as chamadas desse assunto."
         },
         {
+          "nome": "\"Encerrar a conversa\"",
+          "onde": "Último botão de opcoesDoFim",
+          "como": "POST /atendimentos/proximo-assunto com {\"chatId\": \"<chatId da conversa>\", \"resposta\": \"Encerrar a conversa\"}. A Maria devolve \"Combinado. … Quando quiser, é só voltar a falar com a gente.\", com status concluido e sem _links.responder: mostrar e encerrar. Os assuntos guardados continuam guardados."
+        },
+        {
           "nome": "POST /atendimentos/assuntos-em-aberto",
-          "onde": "Rota nova, só no release",
-          "como": "Corpo {\"chatId\": \"<chatId da conversa>\"}. Chamar quando a pessoa toca em \"Ver os assuntos em aberto\"."
+          "onde": "Rota, só no release (opcional)",
+          "como": "Corpo {\"chatId\": \"<chatId da conversa>\"}. Devolve a lista \"Qual você quer resolver agora?\". Os botões do fim não precisam dela; serve se a Tykhe quiser mostrar a lista em outro momento."
         },
         {
           "nome": "_links.responder.href: \"/atendimentos/proximo-assunto\"",
-          "onde": "Resposta da lista do fim",
+          "onde": "Resposta da lista (rota dos assuntos em aberto)",
           "como": "A escolha da pessoa vai para a rota do próximo assunto, com \"resposta\": o texto do botão."
         },
         {
           "nome": "\"Nenhum, quero um assunto novo\"",
-          "onde": "Última opção da lista do fim",
+          "onde": "Última opção da lista (rota dos assuntos em aberto)",
           "como": "A Maria devolve \"Pode me contar o que você precisa?\" com _links.responder.href \"/atendimentos/orquestrador\": abrir uma CONVERSA NOVA."
         },
         {
           "nome": "Conversa nova",
-          "onde": "\"Falar de um assunto novo\" ou \"Nenhum\"",
+          "onde": "Botão \"Falar de um assunto novo\" (ou \"Nenhum\" na lista)",
           "como": "POST /atendimentos/orquestrador com chatId NOVO, o texto da pessoa como mensagem e o mesmo idUsuario."
         },
         {
@@ -818,8 +828,8 @@ window.TAREFAS = {
       "passos": [
         "Crie o nó de API POST /atendimentos/proximo-assunto no release, com o corpo {\"chatId\": \"<chatId da conversa>\"}. Ligue ao caminho \"abrir o próximo\" da T6 (urgente na vez).",
         "Guarde o chatId que vem na resposta numa variável própria e use em todas as chamadas desse assunto. Com flowId, siga pelo fluxo; com redirecionado, pelo tipoCaso; com 404, encerre.",
-        "Crie o nó de API POST /atendimentos/assuntos-em-aberto, com {\"chatId\": \"<chatId da conversa>\"}. Ligue ao botão \"Ver os assuntos em aberto\" da T6.",
-        "Mostre a lista (tipoResposta opcoes) como botões. A escolha vai para POST /atendimentos/proximo-assunto com {\"chatId\": \"<chatId da conversa>\", \"resposta\": \"<texto do botão>\"}. Depois, igual ao passo 2.",
+        "Ligue os botões de assunto da T6 (todos menos os dois últimos) a POST /atendimentos/proximo-assunto com {\"chatId\": \"<chatId da conversa>\", \"resposta\": \"<texto do botão>\"}. Depois, igual ao passo 2.",
+        "Ligue o botão \"Encerrar a conversa\" à mesma rota, com \"resposta\": \"Encerrar a conversa\". Mostre a resposta e encerre a conversa na Tykhe.",
         "Se a resposta for \"Pode me contar o que você precisa?\" (_links.responder para o orquestrador), ou se a pessoa tocar em \"Falar de um assunto novo\": mostre a pergunta e mande a resposta como conversa nova, POST /atendimentos/orquestrador com chatId novo, \"mensagem\" e o mesmo idUsuario.",
         "Quando o assunto aberto terminar, volte à T6 com a nova resposta final.",
         "Rode os casos abaixo e anote os chatId.",
@@ -832,8 +842,8 @@ window.TAREFAS = {
           "esperado": "Se o 1º terminar em concluido, a Tykhe chama a rota sozinha: \"Agora vamos falar da pessoa presa.\", com o chatId terminado em -assunto-2, sem perguntar de novo o parentesco."
         },
         {
-          "relato": "meu filho foi preso e eu queria saber como está o meu processo de pensão (Sim; pessoa presa até o fim; tocar em \"Ver os assuntos em aberto\")",
-          "esperado": "Aparece \"Qual você quer resolver agora?\" com \"O seu processo\". Escolhendo, vem redirecionado com tipoCaso andamento-processo e o chatId -assunto-2."
+          "relato": "meu filho foi preso e eu queria saber como está o meu processo de pensão (Sim; pessoa presa até o fim; tocar no botão \"O seu processo\")",
+          "esperado": "Vem redirecionado com tipoCaso andamento-processo e o chatId -assunto-2."
         },
         {
           "relato": "o mesmo caso, tocando em \"Falar de um assunto novo\" e escrevendo \"quero remarcar meu horário\"",
@@ -842,6 +852,10 @@ window.TAREFAS = {
         {
           "relato": "o mesmo caso, chamando a rota do próximo assunto duas vezes com a mesma escolha",
           "esperado": "As duas respostas trazem o mesmo chatId, sem abrir outro atendimento."
+        },
+        {
+          "relato": "o mesmo caso, com um idUsuario de teste, tocando em \"Encerrar a conversa\"",
+          "esperado": "\"Combinado. Seus assuntos em aberto ficam guardados por até 30 dias. Quando quiser, é só voltar a falar com a gente.\", com status concluido. Numa conversa nova com o mesmo idUsuario, \"quero ver meus assuntos\" ainda mostra \"O seu processo\"."
         }
       ],
       "campos_entrega": [
@@ -851,7 +865,7 @@ window.TAREFAS = {
         },
         {
           "id": "caso2",
-          "rotulo": "Caso 2 (lista do fim): chatId e o que aconteceu"
+          "rotulo": "Caso 2 (botão de um assunto): chatId e o que aconteceu"
         },
         {
           "id": "caso3",
@@ -862,6 +876,10 @@ window.TAREFAS = {
           "rotulo": "Caso 4 (duas chamadas): o que voltou em cada uma"
         },
         {
+          "id": "caso5",
+          "rotulo": "Caso 5 (encerrar): chatId e o que aconteceu"
+        },
+        {
           "id": "pendente",
           "rotulo": "O que não deu certo ou ficou faltando"
         }
@@ -869,8 +887,9 @@ window.TAREFAS = {
       "entregavel": "Preencha os campos da seção \"Entrega\" com os chatId e o resultado de cada caso e o que ficou faltando.",
       "pronto_quando": [
         "O urgente abre pela rota do próximo assunto, e o chatId devolvido é usado daí em diante.",
-        "\"Ver os assuntos em aberto\" mostra a lista, e a escolha abre o assunto certo.",
-        "\"Falar de um assunto novo\" e \"Nenhum\" abrem uma conversa nova com o mesmo idUsuario.",
+        "O botão de um assunto em aberto abre o assunto certo.",
+        "\"Falar de um assunto novo\" abre uma conversa nova com o mesmo idUsuario.",
+        "\"Encerrar a conversa\" fecha, e os assuntos guardados continuam guardados.",
         "Chamar duas vezes não abre dois atendimentos."
       ],
       "cuidados": [
@@ -958,11 +977,11 @@ window.TAREFAS = {
         },
         {
           "relato": "2. meu filho foi preso e eu queria saber como está o meu processo de pensão",
-          "esperado": "A pessoa presa até o fim; \"Ficou para depois: o seu processo…\" e os botões dos assuntos em aberto."
+          "esperado": "A pessoa presa até o fim; o resumo da conversa, \"Ainda em aberto: • O seu processo · menos urgente · em aberto até dd/mm · ainda não começou\" e os botões \"O seu processo\", \"Falar de um assunto novo\" e \"Encerrar a conversa\"."
         },
         {
-          "relato": "3. No fim do caso 2, tocar em \"Ver os assuntos em aberto\" e escolher \"O seu processo\"",
-          "esperado": "A lista aparece; escolhendo, vem redirecionado com tipoCaso andamento-processo."
+          "relato": "3. No fim do caso 2, tocar em \"O seu processo\" (e, numa repetição do caso 2, em \"Encerrar a conversa\")",
+          "esperado": "\"O seu processo\": vem redirecionado com tipoCaso andamento-processo. \"Encerrar a conversa\": \"Combinado. Seus assuntos em aberto ficam guardados por até 30 dias…\"."
         },
         {
           "relato": "4. Conversa nova com o mesmo idUsuario, depois de refazer o caso 2: \"queria saber como está o meu processo\"",
@@ -974,7 +993,7 @@ window.TAREFAS = {
         },
         {
           "relato": "6. o plano negou a minha cirurgia (com um idUsuario sem nada guardado)",
-          "esperado": "Igual a hoje: sem \"Pode ser assim?\", sem próximo assunto e sem botões."
+          "esperado": "Sem \"Pode ser assim?\" e sem próximo assunto. Se terminar em concluido, o resumo com um assunto e \"Quer falar de um assunto novo ou encerrar a conversa?\", com esses dois botões. Se terminar em handoff_humano, como hoje."
         }
       ],
       "campos_entrega": [
