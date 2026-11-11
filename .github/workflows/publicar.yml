@@ -1,6 +1,8 @@
 name: publicar
 
-# Publica a Jornada IA no GitHub Pages a cada merge na main.
+# Publica a Jornada IA no GitHub Pages a cada merge na main e avisa a Marcelle:
+# - versao.json: a página aberta confere e pede para atualizar a tela quando muda;
+# - comentário na issue "[aviso] Atualizações do guia", marcando a jogadora: o GitHub manda o email.
 on:
   push:
     branches: [main]
@@ -8,8 +10,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
@@ -18,9 +18,15 @@ concurrency:
 jobs:
   publicar:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
+    outputs:
+      pagina: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
@@ -28,9 +34,38 @@ jobs:
         run: |
           mkdir -p _site/dados
           cp index.html estilo.css app.js _site/
-          cp dados/guia.js dados/tarefas.js _site/dados/
+          cp dados/guia.js dados/tarefas.js dados/novidades.js _site/dados/
+          printf '{"versao": "%s", "publicado_em": "%s"}\n' "$GITHUB_SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > _site/versao.json
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
       - id: deploy
         uses: actions/deploy-pages@v4
+
+  avisar:
+    needs: publicar
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Comentar na issue de avisos, marcando a jogadora
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PAGINA: ${{ needs.publicar.outputs.pagina }}
+        run: |
+          TITULO="[aviso] Atualizações do guia"
+          gh label create aviso --repo "$REPO" --color 5fb8ff --description "Aviso de atualização do guia" --force
+          NUMERO=$(gh issue list --repo "$REPO" --label aviso --state all --limit 50 --json number,title \
+            --jq "map(select(.title == \"$TITULO\")) | .[0].number // empty")
+          if [ -z "$NUMERO" ]; then
+            URL=$(gh issue create --repo "$REPO" --title "$TITULO" --label aviso \
+              --body "Cada publicação do guia deixa aqui um comentário com o que mudou. Quem é marcado recebe o aviso por email.")
+            NUMERO="${URL##*/}"
+          fi
+          gh api "repos/$REPO/issues/$NUMERO/comments" --paginate --jq '.[].body' > ja-postados.txt
+          git log -1 --format=%B > mensagem.txt
+          python scripts/aviso_atualizacao.py ja-postados.txt mensagem.txt "$PAGINA" "$GITHUB_SHA" > corpo.md
+          gh issue comment "$NUMERO" --repo "$REPO" --body-file corpo.md

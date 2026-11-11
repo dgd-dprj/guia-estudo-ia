@@ -22,6 +22,7 @@ CAMPOS_MODULO = ["id", "semana", "titulo", "objetivo", "ponte", "tempo", "estuda
 CAMPOS_TAREFA = ["titulo", "issues", "descricao", "onde", "como_testar", "cuidado"]
 CAMPOS_TAREFA_LANCADA = ["id", "titulo", "fase", "descricao", "lancada_por", "lancada_em", "prazo", "status", "entrega", "avaliacao"]
 STATUS = {"lancada", "em_andamento", "entregue", "refazer", "avaliada"}
+PRIORIDADES = {"maxima", "alta", "normal"}
 DATA = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
@@ -65,6 +66,39 @@ def verificar_tarefas(t: dict, ids_modulo: set[str]) -> list[str]:
             problemas.append(f"{nome}: 'prazo' precisa ser AAAA-MM-DD ou null")
         if not all(isinstance(n, int) for n in x.get("issues_maria", [])):
             problemas.append(f"{nome}: os números em 'issues_maria' precisam ser inteiros")
+        if "urgente" in x and not isinstance(x["urgente"], bool):
+            problemas.append(f"{nome}: 'urgente' precisa ser true ou false")
+        if x.get("prazo_hora") is not None and not re.match(r"^([01]\d|2[0-3]):[0-5]\d$", str(x["prazo_hora"])):
+            problemas.append(f"{nome}: 'prazo_hora' precisa ser HH:MM")
+        if "prioridade" in x and x["prioridade"] not in PRIORIDADES:
+            problemas.append(f"{nome}: 'prioridade' precisa ser um de {sorted(PRIORIDADES)}")
+        for dep in x.get("depende_de", []):
+            if dep not in ids or dep == x.get("id"):
+                problemas.append(f"{nome}: 'depende_de' cita '{dep}', que não é outra tarefa da lista")
+        for i in x.get("identificadores", []):
+            if not all(isinstance(i.get(c), str) and i[c].strip() for c in ("nome", "onde", "como")):
+                problemas.append(f"{nome}: cada identificador precisa de 'nome', 'onde' e 'como'")
+        for c in x.get("casos_teste", []):
+            if not c.get("relato") or not c.get("esperado"):
+                problemas.append(f"{nome}: cada caso de teste precisa de 'relato' e 'esperado'")
+        ids_campos = [c.get("id") for c in x.get("campos_entrega", [])]
+        if len(ids_campos) != len(set(ids_campos)) or not all(ids_campos):
+            problemas.append(f"{nome}: os campos de entrega precisam de 'id' único")
+        for c in x.get("campos_entrega", []):
+            if not c.get("rotulo"):
+                problemas.append(f"{nome}: o campo de entrega '{c.get('id')}' precisa de 'rotulo'")
+        for campo in ("objetivo", "contexto", "tempo", "entregavel"):
+            if campo in x and not (isinstance(x[campo], str) and x[campo].strip()):
+                problemas.append(f"{nome}: '{campo}' precisa ser um texto")
+        for campo in ("passos", "pronto_quando", "cuidados"):
+            if campo in x and not (isinstance(x[campo], list) and all(isinstance(i, str) and i.strip() for i in x[campo])):
+                problemas.append(f"{nome}: '{campo}' precisa ser uma lista de textos")
+        for d in x.get("issues_detalhe", []):
+            if not isinstance(d.get("numero"), int) or not d.get("titulo"):
+                problemas.append(f"{nome}: cada item de 'issues_detalhe' precisa de 'numero' (inteiro) e 'titulo'")
+            for campo in ("olhar", "perguntas"):
+                if campo in d and not (isinstance(d[campo], list) and all(isinstance(i, str) for i in d[campo])):
+                    problemas.append(f"{nome}, issue {d.get('numero')}: '{campo}' precisa ser uma lista de textos")
         entrega = x.get("entrega") or {}
         if not data_ok(entrega.get("em"), opcional=True):
             problemas.append(f"{nome}: 'entrega.em' precisa ser AAAA-MM-DD ou null")
@@ -81,6 +115,25 @@ def verificar_tarefas(t: dict, ids_modulo: set[str]) -> list[str]:
                 problemas.append(f"{nome}: a nota de '{chave}' precisa ser de 1 a 5 ou null")
         if x.get("status") == "avaliada" and not any(isinstance(v, int) for v in (avaliacao.get("criterios") or {}).values()):
             problemas.append(f"{nome}: status 'avaliada' sem nenhuma nota")
+    return problemas
+
+
+def verificar_novidades(n: dict) -> list[str]:
+    problemas: list[str] = []
+    lista = n.get("lista")
+    if not isinstance(lista, list):
+        return ["novidades.js: falta a 'lista'"]
+    ids = [x.get("id") for x in lista]
+    if len(ids) != len(set(ids)) or not all(ids):
+        problemas.append("novidades.js: cada novidade precisa de 'id' único")
+    for x in lista:
+        nome = f"novidade {x.get('id', '?')}"
+        if not data_ok(x.get("em")):
+            problemas.append(f"{nome}: 'em' precisa ser AAAA-MM-DD")
+        if not (isinstance(x.get("titulo"), str) and x["titulo"].strip()):
+            problemas.append(f"{nome}: falta 'titulo'")
+        if x.get("link") and not link_valido(x["link"]):
+            problemas.append(f"{nome}: 'link' precisa começar com https:// ou #/")
     return problemas
 
 
@@ -142,7 +195,8 @@ def verificar(g: dict) -> list[str]:
 def main() -> int:
     g = carregar()
     t = carregar(ARQUIVO_TAREFAS, "window.TAREFAS =")
-    problemas = verificar(g) + verificar_tarefas(t, {m.get("id") for m in g.get("modulos", [])})
+    n = carregar(DADOS / "novidades.js", "window.NOVIDADES =")
+    problemas = verificar(g) + verificar_tarefas(t, {m.get("id") for m in g.get("modulos", [])}) + verificar_novidades(n)
     if problemas:
         print("Problemas encontrados:")
         for p in problemas:

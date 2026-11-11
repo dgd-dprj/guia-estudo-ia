@@ -76,9 +76,23 @@ As tarefas ficam em `dados/tarefas.js`, em JSON, dentro de `window.TAREFAS = { .
   | `status` | `lancada`, `em_andamento`, `entregue`, `refazer` ou `avaliada` |
   | `entrega` | `em` (data), `link` (PR ou issue, `https://`) e `observacao` |
   | `avaliacao` | `por` (quem avaliou), `em`, uma nota de 1 a 5 para cada critério e `comentario` |
+  | Opcionais, para detalhar | `objetivo`, `tempo`, `passos` (lista), `issues_detalhe` (por issue: `numero`, `titulo`, `resumo`, `olhar` e `perguntas`), `entregavel`, `pronto_quando` (lista) e `cuidados` (lista) |
+  | Opcionais, para prioridade e ordem | `urgente` (`true`), `prioridade` (`maxima`, `alta` ou `normal`), `depende_de` (ids das tarefas que vêm antes) e `identificadores` (por item: `nome`, `onde` e `como`, os nomes exatos de campos e rotas) |
+
+  Com `issues_detalhe`, o "📬 Avisar entrega" abre a issue já com um bloco por issue para a Marcelle preencher.
 
 - **Critérios:** qualidade da entrega, testes, prazo, comunicação e autonomia. Os nomes ficam em `criterios`, no mesmo arquivo.
 - **Entrega:** na página de tarefas, a Marcelle usa **"📬 Avisar entrega"**, que abre uma issue `[entrega] T1 — título` com a etiqueta `entrega`. Depois, a Nicole ou o Ícaro atualizam a tarefa no arquivo, com a data, o link e a avaliação.
+- **Salvar em arquivo:** cada tarefa tem **"💾 Salvar em arquivo (para o Ícaro)"**, que baixa um `.md` com a tarefa inteira, os passos marcados, o que foi anotado na entrega e o que falta. No topo da página, **"💾 Salvar todas as tarefas em aberto num arquivo"** junta todas num arquivo só. Serve para passar a tarefa adiante quando não der para terminar.
+
+## Avisos de atualização
+
+**A cada atualização do guia, acrescente uma entrada no topo de `dados/novidades.js`:** `id` único (data e um nome curto), `em` (`AAAA-MM-DD`), `titulo`, `texto` e `link` (`https://` ou rota interna, como `#/tarefas`).
+
+Depois do merge na `main`, a publicação avisa a Marcelle de dois jeitos:
+
+- **Na tela:** a faixa "🔔 Novidades no guia" mostra as entradas que ela ainda não viu, até ela clicar em "✓ Entendi". Se a página estiver aberta durante a publicação, aparece "🔄 O guia foi atualizado agora", com o botão "Atualizar a tela". A página confere o `versao.json` a cada 5 minutos e quando a aba volta a ficar visível.
+- **Por email:** o workflow `publicar` comenta na issue "[aviso] Atualizações do guia", marcando a jogadora (`jogadora.github`). O GitHub manda o email de quem é marcado, se ela não tiver desligado os emails de menção nas configurações dela. Sem novidade nova, o comentário leva o título do PR.
 
 ## O painel da equipe
 

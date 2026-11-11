@@ -64,6 +64,7 @@
     return {
       marcados: p.marcados || {}, notas: p.notas || {}, quiz: p.quiz || {}, dias: p.dias || [],
       historico: p.historico || {}, quizPrimeira: p.quizPrimeira || {}, concluidas: p.concluidas || {},
+      tarefas: p.tarefas || {}, // por tarefa: passos marcados e o texto da entrega
     };
   }
   function lerProgresso() {
@@ -346,6 +347,23 @@
         el("a", { classe: "botao secundario", href: "#/inventario", texto: "🎒 Inventário" }),
         el("a", { classe: "botao secundario", href: "#/inicio/salvar", texto: "💾 Como salva" }),
       ])),
+      (() => {
+        const varias = tarefasPrioritarias();
+        if (varias.length > 1) {
+          const s = situacaoPrazo(varias[0], hoje());
+          return el("a", { classe: "faixa-urgente", href: "#/tarefas" }, [
+            el("strong", { texto: "🚨 " + varias.length + " tarefas de prioridade máxima: " + varias.map((t) => t.id).join(", ") }),
+            el("span", { texto: s.texto + " · Abrir ▶" }),
+          ]);
+        }
+        const u = tarefaUrgente();
+        if (!u) return null;
+        const s = situacaoPrazo(u, hoje());
+        return el("a", { classe: "faixa-urgente", href: "#/tarefas" }, [
+          el("strong", { texto: "🚨 Tarefa urgente: " + u.id + " — " + u.titulo }),
+          el("span", { texto: s.texto + " · Abrir ▶" }),
+        ]);
+      })(),
       montarMundo(),
       el("div", { classe: "legenda" }, [
         el("span", { classe: "l-feito", texto: "fase completa" }),
@@ -619,6 +637,69 @@
     avaliada: { icone: "✅", nome: "Avaliada", classe: "bom" },
   };
   const foiEntregue = (t) => t.status === "entregue" || t.status === "avaliada";
+  const horaPrazo = (t) => (/^\d{2}:\d{2}$/.test(t.prazo_hora || "") ? t.prazo_hora : null);
+  const textoPrazo = (t) => dataLonga(t.prazo) + (horaPrazo(t) ? " às " + horaPrazo(t) : "");
+  const tarefaUrgente = () => (T.tarefas || []).find((t) => t.urgente && !foiEntregue(t));
+  const PRIORIDADES = { maxima: "🔺 Prioridade máxima", alta: "▲ Prioridade alta", normal: "Prioridade normal" };
+  // As tarefas em aberto que pedem pressa: as urgentes e as de prioridade máxima.
+  const tarefasPrioritarias = () => (T.tarefas || []).filter((t) => (t.urgente || t.prioridade === "maxima") && !foiEntregue(t));
+
+  // ── Salvar em arquivo: para passar a tarefa adiante (por exemplo, ao Ícaro) ──
+  // O arquivo leva a tarefa inteira, os passos marcados, o que foi escrito na entrega e o que falta.
+  function baixarArquivo(nome, texto) {
+    const arquivo = new Blob([texto], { type: "text/markdown;charset=utf-8" });
+    const a = el("a", { href: URL.createObjectURL(arquivo), download: nome });
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  }
+  function textoDaTarefa(t) {
+    const salvo = progresso.tarefas[t.id] || { feitos: {}, respostas: {} };
+    const passos = Array.isArray(t.passos) ? t.passos : [];
+    const feitos = passos.filter((_, i) => salvo.feitos[i]).length;
+    const linhas = ["# " + t.id + " — " + t.titulo, ""];
+    linhas.push("- Prazo: " + textoPrazo(t) + (t.prioridade ? " · " + (PRIORIDADES[t.prioridade] || t.prioridade) : ""));
+    if (Array.isArray(t.depende_de) && t.depende_de.length) linhas.push("- Depende de: " + t.depende_de.join(", "));
+    if ((t.issues_maria || []).length) linhas.push("- Issues da Maria: " + t.issues_maria.map((n) => "#" + n).join(", "));
+    linhas.push("- Passos feitos: " + feitos + " de " + passos.length, "", t.descricao || "");
+    if (t.objetivo) linhas.push("", "## Objetivo", "", t.objetivo);
+    if (t.contexto) linhas.push("", "## Para entender", "", t.contexto);
+    if (Array.isArray(t.identificadores) && t.identificadores.length) {
+      linhas.push("", "## Identificadores", "", "| Identificador | Onde aparece | Como reconhecer e o que fazer |", "|---|---|---|");
+      t.identificadores.forEach((x) => linhas.push("| `" + x.nome + "` | " + x.onde + " | " + x.como + " |"));
+    }
+    if (passos.length) {
+      linhas.push("", "## Passo a passo", "");
+      passos.forEach((p, i) => linhas.push("- [" + (salvo.feitos[i] ? "x" : " ") + "] " + (i + 1) + ". " + p));
+      const faltam = passos.map((p, i) => [p, i]).filter(([, i]) => !salvo.feitos[i]);
+      linhas.push("", "## O que falta", "", faltam.length ? faltam.map(([p, i]) => "- " + (i + 1) + ". " + p).join("\n") : "Nada: todos os passos foram marcados.");
+    }
+    const campos = Array.isArray(t.campos_entrega) ? t.campos_entrega : [];
+    if (campos.length) {
+      linhas.push("", "## O que foi anotado");
+      campos.forEach((c) => linhas.push("", "### " + c.rotulo, "", (salvo.respostas[c.id] || "").trim() || "(não preenchido)"));
+    }
+    if (Array.isArray(t.casos_teste) && t.casos_teste.length) {
+      linhas.push("", "## Casos para testar", "");
+      t.casos_teste.forEach((c, i) => linhas.push((i + 1) + ". Relato: \"" + c.relato + "\"  ", "   Esperado: " + c.esperado));
+    }
+    if (Array.isArray(t.pronto_quando) && t.pronto_quando.length) linhas.push("", "## Pronto quando", "", ...t.pronto_quando.map((x) => "- " + x));
+    if (Array.isArray(t.cuidados) && t.cuidados.length) linhas.push("", "## Cuidados", "", ...t.cuidados.map((x) => "- " + x));
+    return linhas.join("\n");
+  }
+  function cabecalhoDoArquivo() {
+    const agora = new Date();
+    return "Gerado pela Jornada IA em " + dataLonga(hoje()) + " às " + String(agora.getHours()).padStart(2, "0") + ":" + String(agora.getMinutes()).padStart(2, "0") +
+      ".\nSem dados pessoais de assistidos e sem chaves.\n\n";
+  }
+  function botaoSalvarArquivo(t) {
+    const b = el("button", { type: "button", classe: "botao secundario", texto: "💾 Salvar em arquivo (para o Ícaro)" });
+    b.addEventListener("click", () => {
+      baixarArquivo(t.id + "-para-o-icaro.md", cabecalhoDoArquivo() + textoDaTarefa(t) + "\n");
+      avisar("💾 Arquivo salvo: mande para o Ícaro terminar", true);
+    });
+    return b;
+  }
   function situacaoPrazo(t, ref) {
     if (!dataValida(t.prazo)) return { texto: "sem prazo", classe: "neutro", atraso: 0 };
     const em = t.entrega && dataValida(t.entrega.em) ? t.entrega.em : null;
@@ -630,6 +711,15 @@
     }
     if (foiEntregue(t)) return { texto: "entregue (sem data)", classe: "neutro", atraso: 0 };
     const falta = diaNum(t.prazo) - diaNum(ref);
+    const hora = horaPrazo(t);
+    if (falta === 0 && hora && ref === hoje()) {
+      const [h, m] = hora.split(":").map(Number);
+      const agora = new Date();
+      const min = h * 60 + m - (agora.getHours() * 60 + agora.getMinutes());
+      if (min < 0) return { texto: "⚠ passou das " + hora, classe: "critico", atraso: 0, atrasada: true };
+      const resta = min >= 60 ? Math.floor(min / 60) + "h" + String(min % 60).padStart(2, "0") : min + " min";
+      return { texto: "⏰ hoje até as " + hora + " (faltam " + resta + ")", classe: "urgente", atraso: 0 };
+    }
     if (falta < 0) return { texto: "⚠ atrasada " + plural(-falta, "dia", "dias"), classe: "critico", atraso: -falta, atrasada: true };
     return { texto: falta === 0 ? "⏰ vence hoje" : "⏳ faltam " + plural(falta, "dia", "dias"), classe: "neutro", atraso: 0 };
   }
@@ -665,37 +755,198 @@
   function issuesDaMaria(lista) {
     return (lista || []).length ? el("span", {}, lista.flatMap((n, j) => (j ? [", ", linkIssue(n)] : [linkIssue(n)]))) : "—";
   }
-  function cartaoTarefa(t) {
+  // A parte da entrega: o que a jogadora marca e escreve fica no navegador (progresso.tarefas)
+  // e vira o texto da issue [entrega] num clique.
+  function blocoEntrega(t, passos) {
+    const salvo = progresso.tarefas[t.id] || (progresso.tarefas[t.id] = { feitos: {}, respostas: {} });
+    const campos = Array.isArray(t.campos_entrega) ? t.campos_entrega : [];
+    const areas = campos.map((c) => {
+      const ta = el("textarea", { id: "e-" + t.id + "-" + c.id, rows: "4", classe: "campo-entrega" });
+      ta.value = salvo.respostas[c.id] || "";
+      ta.addEventListener("input", () => { salvo.respostas[c.id] = ta.value; salvar(); });
+      return el("div", { classe: "campo" }, [el("label", { for: ta.id, texto: c.rotulo }), ta]);
+    });
+    const resumoPasso = (p) => p.split(/[:.]/)[0].slice(0, 80);
+    const montarCorpo = () => {
+      const feitos = passos.filter((_, i) => salvo.feitos[i]).length;
+      let c = "Tarefa: " + t.id + " — " + t.titulo + "\n\n";
+      if (passos.length) c += "Passos concluídos: " + feitos + "/" + passos.length + "\n\n" + passos.map((p, i) => "- [" + (salvo.feitos[i] ? "x" : " ") + "] " + (i + 1) + ". " + resumoPasso(p)).join("\n") + "\n\n";
+      c += campos.length
+        ? campos.map((cp) => "## " + cp.rotulo + "\n\n" + ((salvo.respostas[cp.id] || "").trim() || "(não preenchido)")).join("\n\n") + "\n\n"
+        : "Link do PR ou da issue: \n\nO que fiz: \n\nComo testei: \n\n";
+      return c + "(Sem dados pessoais de assistidos e sem chaves.)";
+    };
+    const enviar = el("button", { type: "button", classe: "botao", texto: "📬 Enviar entrega" });
+    enviar.addEventListener("click", () => {
+      const vazios = campos.filter((c) => !(salvo.respostas[c.id] || "").trim()).length;
+      if (vazios && !window.confirm("Faltam " + plural(vazios, "campo", "campos") + " para preencher. Enviar assim mesmo?")) return;
+      const titulo = "[entrega] " + t.id + " — " + t.titulo;
+      const corpo = montarCorpo();
+      let url = linkNovaIssue(titulo, corpo);
+      if (url.length > 7500) {
+        // Texto grande demais para ir no endereço: copia e pede para colar.
+        if (navigator.clipboard) navigator.clipboard.writeText(corpo).catch(() => {});
+        url = linkNovaIssue(titulo, "O texto da entrega foi copiado pela página. Apague esta linha, cole aqui (Ctrl+V) e confirme.");
+        avisar("📋 Texto copiado: cole na issue com Ctrl+V", true);
+      }
+      window.open(url, "_blank", "noopener");
+    });
+    return el("section", { classe: "tarefa-bloco entrega-tarefa" }, [
+      el("h4", { texto: "📬 Entrega" }),
+      t.entregavel ? el("p", { texto: t.entregavel }) : null,
+      ...areas,
+      el("p", { classe: "meta", texto: "O que você escreve aqui fica salvo neste navegador. O botão abre o GitHub com tudo preenchido, incluindo os passos que você marcou: é só conferir e confirmar." }),
+      el("p", { classe: "meta", texto: "Não deu para terminar? \"💾 Salvar em arquivo\" baixa a tarefa com os passos marcados, o que você anotou e o que falta. Mande o arquivo ao Ícaro para ele terminar a parte da Tykhe." }),
+      el("div", { classe: "acoes" }, [enviar, botaoSalvarArquivo(t)]),
+    ]);
+  }
+  function listaPassos(t, passos, aoMudar) {
+    const salvo = progresso.tarefas[t.id] || (progresso.tarefas[t.id] = { feitos: {}, respostas: {} });
+    return el("ul", { classe: "lista-check passos-tarefa" }, passos.map((p, i) => {
+      const id = "p-" + t.id + "-" + i;
+      const cx = el("input", { type: "checkbox", id: id });
+      cx.checked = !!salvo.feitos[i];
+      const li = el("li", { classe: cx.checked ? "feito" : null }, [cx, el("label", { for: id }, [el("strong", { texto: (i + 1) + ". " }), p])]);
+      cx.addEventListener("change", () => {
+        if (cx.checked) salvo.feitos[i] = true; else delete salvo.feitos[i];
+        li.classList.toggle("feito", cx.checked);
+        salvar();
+        aoMudar();
+      });
+      return li;
+    }));
+  }
+  // Cartões minimizados: preferência de quem vê, só neste navegador (não vai no progresso nem no envio).
+  const CHAVE_MINIMIZADAS = "guia-ia-tarefas-minimizadas";
+  function lerMinimizadas() {
+    try { return JSON.parse(localStorage.getItem(CHAVE_MINIMIZADAS) || "{}") || {}; } catch (e) { return {}; }
+  }
+  function guardarMinimizada(id, minimizada) {
+    const m = lerMinimizadas();
+    m[id] = minimizada;
+    try { localStorage.setItem(CHAVE_MINIMIZADAS, JSON.stringify(m)); } catch (e) { /* segue sem guardar */ }
+  }
+  function aplicarMinimizada(cartao, minimizada) {
+    cartao.classList.toggle("minimizada", minimizada);
+    const botao = cartao.querySelector(".botao-minimizar");
+    if (botao) {
+      botao.textContent = minimizada ? "▸ Abrir" : "▾ Minimizar";
+      botao.setAttribute("aria-expanded", minimizada ? "false" : "true");
+    }
+  }
+  function cartaoTarefa(t, abertaPorPadrao) {
     const prazo = situacaoPrazo(t, hoje());
-    const corpo = "Tarefa: " + t.id + " — " + t.titulo + "\n\nLink do PR ou da issue: \n\nO que fiz: \n\nComo testei: \n\nDúvidas: \n\n(Sem dados pessoais de assistidos e sem chaves.)";
+    const detalhes = Array.isArray(t.issues_detalhe) ? t.issues_detalhe : [];
+    const passos = Array.isArray(t.passos) ? t.passos : [];
+    const casos = Array.isArray(t.casos_teste) ? t.casos_teste : [];
     const entrega = t.entrega || {};
-    return el("article", { classe: "painel tarefa-cartao" }, [
-      el("div", { classe: "tarefa-topo" }, [el("span", { classe: "tarefa-id", texto: t.id }), el("h3", { texto: t.titulo }), seloStatus(t.status)]),
+    const lista = (itens, ordenada) => el(ordenada ? "ol" : "ul", { classe: "tarefa-lista" }, itens.map((x) => el("li", { texto: x })));
+    const bloco = (titulo, conteudo, extra) => el("section", { classe: "tarefa-bloco" }, [el("h4", {}, [titulo, extra || null]), conteudo]);
+    const contagem = el("span", { classe: "xp-tag" });
+    const contagemTopo = el("span", { classe: "xp-tag" });
+    const contar = () => {
+      const s = progresso.tarefas[t.id] || { feitos: {} };
+      contagem.textContent = contagemTopo.textContent = passos.filter((_, i) => s.feitos[i]).length + "/" + passos.length + " feitos";
+    };
+    contar();
+    const corpoId = "corpo-" + t.id;
+    const minimizar = el("button", { type: "button", classe: "botao secundario botao-minimizar", "aria-controls": corpoId });
+    const salvas = lerMinimizadas();
+    const minimizada = t.id in salvas ? !!salvas[t.id] : !abertaPorPadrao;
+    const cartao = el("article", { classe: "painel tarefa-cartao" + (t.urgente && !foiEntregue(t) ? " urgente" : "") }, [
+      el("div", { classe: "tarefa-topo" }, [
+        el("span", { classe: "tarefa-id", texto: t.id }), el("h3", { texto: t.titulo }),
+        t.urgente && !foiEntregue(t) ? el("span", { classe: "selo critico", texto: "🚨 Urgente" }) : null,
+        t.prioridade && PRIORIDADES[t.prioridade] && t.prioridade !== "normal" ? el("span", { classe: "selo critico", texto: PRIORIDADES[t.prioridade] }) : null,
+        seloStatus(t.status),
+        minimizar,
+      ]),
+      // Visível só com o cartão minimizado: o prazo e os passos feitos.
+      el("p", { classe: "tarefa-resumo" }, [textoPrazo(t) + " ", el("span", { classe: "prazo " + prazo.classe, texto: prazo.texto }), " ", passos.length ? contagemTopo : null]),
+      el("div", { classe: "tarefa-corpo", id: corpoId }, [
       el("p", { texto: t.descricao }),
       el("dl", { classe: "fichas" }, [
         ficha("Fase", t.fase ? linkSeguro(nomeFase(t.fase), "#/modulo/" + t.fase + "/6") : "—"),
         ficha("Lançada por", (t.lancada_por || "—") + " em " + dataLonga(t.lancada_em)),
-        ficha("Prazo", el("span", {}, [dataLonga(t.prazo) + " ", el("span", { classe: "prazo " + prazo.classe, texto: prazo.texto })])),
+        ficha("Prazo", el("span", {}, [textoPrazo(t) + " ", el("span", { classe: "prazo " + prazo.classe, texto: prazo.texto })])),
         ficha("Issues da Maria", issuesDaMaria(t.issues_maria)),
         ficha("Entrega", entrega.link ? linkSeguro("abrir a entrega", entrega.link) : dataValida(entrega.em) ? dataLonga(entrega.em) : "—"),
+        t.tempo ? ficha("Tempo estimado", t.tempo) : null,
+        Array.isArray(t.depende_de) && t.depende_de.length ? ficha("Depende de", "fazer antes: " + t.depende_de.join(", ")) : null,
       ]),
       entrega.observacao ? el("p", { classe: "meta" }, ["📝 ", entrega.observacao]) : null,
+      t.objetivo ? bloco("🎯 Objetivo", el("p", { texto: t.objetivo })) : null,
+      t.contexto ? bloco("🧭 Para entender", el("p", { texto: t.contexto })) : null,
+      Array.isArray(t.identificadores) && t.identificadores.length ? bloco("🔑 Identificadores", el("div", {}, [
+        el("p", { classe: "meta", texto: "Os nomes exatos que aparecem na Maria e na Tykhe. Use para saber qual resposta é qual e o que fazer com ela." }),
+        tabelaSimples(["Identificador", "Onde aparece", "Como reconhecer e o que fazer"],
+          t.identificadores.map((x) => [el("code", { texto: x.nome }), x.onde, x.como]), "identificadores"),
+      ])) : null,
+      passos.length ? bloco("🪜 Passo a passo ", el("div", {}, [
+        el("p", { classe: "meta", texto: "Marque cada passo quando terminar. Fica salvo neste navegador e vai junto na entrega." }),
+        listaPassos(t, passos, contar),
+      ]), contagem) : null,
+      detalhes.length ? bloco("🔎 As issues, uma por uma", el("div", { classe: "issues-detalhe" }, detalhes.map((d) => el("div", { classe: "issue-cartao" }, [
+        el("h5", {}, [linkIssue(d.numero), " · " + d.titulo]),
+        d.resumo ? el("p", { texto: d.resumo }) : null,
+        Array.isArray(d.olhar) && d.olhar.length ? el("div", {}, [el("strong", { texto: "📂 Onde olhar" }), lista(d.olhar)]) : null,
+        Array.isArray(d.perguntas) && d.perguntas.length ? el("div", {}, [el("strong", { texto: "❓ Perguntas-guia" }), lista(d.perguntas)]) : null,
+      ])))) : null,
+      casos.length ? bloco("🧪 Casos para testar", el("ol", { classe: "tarefa-lista" }, casos.map((c) => el("li", {}, [
+        el("strong", { texto: "Relato: " }), "“" + c.relato + "”", el("br"), el("strong", { texto: "Esperado: " }), c.esperado,
+      ])))) : null,
+      Array.isArray(t.pronto_quando) && t.pronto_quando.length ? bloco("🏁 Pronto quando", lista(t.pronto_quando)) : null,
+      Array.isArray(t.cuidados) && t.cuidados.length ? bloco("⚠️ Cuidados", el("div", { classe: "cuidado" }, [lista(t.cuidados)])) : null,
+      foiEntregue(t) ? (t.entregavel ? bloco("📦 O que foi pedido", el("p", { texto: t.entregavel })) : null) : blocoEntrega(t, passos),
       el("h4", { texto: "⭐ Avaliação" }),
       blocoAvaliacao(t),
-      foiEntregue(t) ? null : el("div", { classe: "acoes" }, [
-        linkExterno("📬 Avisar entrega", linkNovaIssue("[entrega] " + t.id + " — " + t.titulo, corpo), "botao"),
       ]),
     ]);
+    cartao.dataset.tarefa = t.id;
+    minimizar.addEventListener("click", () => {
+      const agora = !cartao.classList.contains("minimizada");
+      aplicarMinimizada(cartao, agora);
+      guardarMinimizada(t.id, agora);
+    });
+    aplicarMinimizada(cartao, minimizada);
+    return cartao;
   }
   function paginaTarefas() {
     const lista = T.tarefas || [];
     const abertas = lista.filter((t) => !foiEntregue(t)).length;
+    const urgente = tarefaUrgente();
+    const prioritarias = tarefasPrioritarias();
     const fala = !lista.length ? "Ainda não há tarefas lançadas. Quando a Nicole ou o Ícaro lançarem, elas aparecem aqui."
-      : "Estas são as tarefas que a Nicole e o Ícaro lançaram para você.\n" + (abertas ? "Em aberto: " + abertas + ". Ao terminar, use \"Avisar entrega\"." : "Tudo entregue! 🎉");
+      : prioritarias.length > 1 ? "🚨 Você tem " + prioritarias.length + " tarefas de prioridade máxima: " + prioritarias.map((t) => t.id).join(", ") +
+        ".\nPrazo: " + textoPrazo(prioritarias[0]) + ". Faça na ordem, uma de cada vez.\nNão deu para terminar? Salve em arquivo e mande ao Ícaro."
+      : urgente ? "🚨 Tarefa urgente: " + urgente.id + " — " + urgente.titulo + ".\nPrazo: " + textoPrazo(urgente) + ". Comece por ela!"
+        : "Estas são as tarefas que a Nicole e o Ícaro lançaram para você.\n" + (abertas ? "Em aberto: " + abertas + ". Ao terminar, use \"Enviar entrega\"." : "Tudo entregue! 🎉");
+    // Urgente em aberto primeiro; depois as abertas pelo prazo; as entregues no fim.
+    const ordem = (t) => (foiEntregue(t) ? 2 : t.urgente ? 0 : 1);
+    const ordenadas = lista.slice().sort((a, b) => ordem(a) - ordem(b) || String(a.prazo || "9").localeCompare(String(b.prazo || "9")));
+    const salvarTodas = el("button", { type: "button", classe: "botao", texto: "💾 Salvar todas as tarefas em aberto num arquivo (para o Ícaro)" });
+    salvarTodas.addEventListener("click", () => {
+      const abertasLista = ordenadas.filter((t) => !foiEntregue(t));
+      baixarArquivo("tarefas-em-aberto-para-o-icaro.md", cabecalhoDoArquivo() + abertasLista.map(textoDaTarefa).join("\n\n---\n\n") + "\n");
+      avisar("💾 Arquivo salvo com " + plural(abertasLista.length, "tarefa", "tarefas") + ": mande para o Ícaro", true);
+    });
+    // Ao abrir a página, só a próxima tarefa em aberto fica aberta; as outras começam minimizadas.
+    const proxima = ordenadas.find((t) => !foiEntregue(t));
+    const todas = (minimizada) => {
+      document.querySelectorAll(".tarefa-cartao").forEach((c) => {
+        aplicarMinimizada(c, minimizada);
+        guardarMinimizada(c.dataset.tarefa, minimizada);
+      });
+    };
+    const minimizarTodas = el("button", { type: "button", classe: "botao secundario", texto: "▸ Minimizar todas" });
+    minimizarTodas.addEventListener("click", () => todas(true));
+    const abrirTodas = el("button", { type: "button", classe: "botao secundario", texto: "▾ Abrir todas" });
+    abrirTodas.addEventListener("click", () => todas(false));
     return [
-      dialogo(fala),
+      dialogo(fala, abertas ? el("div", { classe: "acoes" }, [salvarTodas]) : null),
       el("div", { classe: "legenda" }, Object.values(STATUS).map((s) => el("span", { classe: "selo " + s.classe, texto: s.icone + " " + s.nome }))),
-      ...lista.slice().reverse().map(cartaoTarefa),
+      lista.length ? el("div", { classe: "acoes acoes-tarefas" }, [minimizarTodas, abrirTodas]) : null,
+      ...ordenadas.map((t) => cartaoTarefa(t, proxima && t.id === proxima.id)),
       el("details", { classe: "como-lancar" }, [
         el("summary", { texto: "🧭 Como lançar uma tarefa (Nicole e Ícaro)" }),
         el("p", { texto: T.explicacao || "" }),
@@ -788,7 +1039,8 @@
             if (r) lista.push(r);
           } else if (titulo.startsWith("[entrega]")) {
             const id = (/^\[entrega\]\s*(T\d+)/.exec(titulo) || [])[1];
-            if (id) entregas[id] = { data: data, link: i.html_url };
+            const passos = /Passos concluídos:\s*(\d+)\/(\d+)/.exec(i.body || "");
+            if (id) entregas[id] = { data: data, link: i.html_url, passos: passos ? passos[1] + "/" + passos[2] : null };
           }
         });
         envios = { estado: "pronto", lista: lista, entregas: entregas, erro: null };
@@ -1040,8 +1292,8 @@
       return [
         el("span", {}, [el("strong", { texto: t.id + " " }), t.titulo]),
         t.fase ? el("a", { href: "#/modulo/" + t.fase + "/6", texto: nomeFase(t.fase).split(":")[0] }) : "—",
-        dataLonga(t.lancada_em), dataLonga(t.prazo),
-        el("span", {}, [seloStatus(t.status), aviso && !foiEntregue(t) ? el("span", { classe: "meta" }, [" · avisou em " + dataCurta(aviso.data) + " ", linkSeguro("(issue)", aviso.link)]) : null]),
+        dataLonga(t.lancada_em), textoPrazo(t),
+        el("span", {}, [seloStatus(t.status), aviso && !foiEntregue(t) ? el("span", { classe: "meta" }, [" · enviou em " + dataCurta(aviso.data) + (aviso.passos ? " · passos " + aviso.passos : "") + " ", linkSeguro("(issue)", aviso.link)]) : null]),
         el("span", { classe: "prazo " + sit[k].classe, texto: sit[k].texto }),
         fmtNota(notaMedia(t)),
       ];
@@ -1115,4 +1367,65 @@
   document.title = G.titulo;
   window.addEventListener("hashchange", render);
   render();
+
+  // ── Avisos de atualização ─────────────────────────────────────────────────────
+  // 1) Novidades (dados/novidades.js): as entradas que a jogadora ainda não viu aparecem numa faixa no topo.
+  // 2) Versão nova publicada: a publicação grava versao.json. Com a página aberta, ela confere a cada 5 minutos
+  //    e quando a aba volta a ficar visível; se mudou, pede para atualizar a tela.
+  const faixa = document.getElementById("faixa-atualizacao");
+  const N = window.NOVIDADES || { lista: [] };
+  const CHAVE_VISTAS = "guia-ia-novidades-vistas";
+  let versaoCarregada = null;
+  let versaoNova = false;
+  function lerVistas() {
+    try { const v = JSON.parse(localStorage.getItem(CHAVE_VISTAS) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; }
+  }
+  function marcarVistas(ids) {
+    const v = new Set(lerVistas());
+    ids.forEach((i) => v.add(i));
+    try { localStorage.setItem(CHAVE_VISTAS, JSON.stringify([...v])); } catch (e) { /* segue sem guardar */ }
+  }
+  function mostrarFaixa() {
+    if (!faixa) return;
+    const vistas = new Set(lerVistas());
+    const novas = (N.lista || []).filter((n) => n && n.id && !vistas.has(n.id));
+    const partes = [];
+    if (versaoNova) {
+      const atualizar = el("button", { type: "button", classe: "botao", texto: "🔄 Atualizar a tela" });
+      atualizar.addEventListener("click", () => location.reload());
+      partes.push(el("div", { classe: "faixa-linha" }, [
+        el("strong", { texto: "🔄 O guia foi atualizado agora." }),
+        el("span", { texto: " Atualize a tela para ver as mudanças. O que você marcou e escreveu continua salvo." }),
+        atualizar,
+      ]));
+    }
+    if (novas.length) {
+      const entendi = el("button", { type: "button", classe: "botao secundario", texto: "✓ Entendi" });
+      entendi.addEventListener("click", () => { marcarVistas(novas.map((n) => n.id)); mostrarFaixa(); });
+      partes.push(el("div", { classe: "faixa-novidades" }, [
+        el("strong", { texto: "🔔 Novidades no guia" }),
+        el("ul", {}, novas.map((n) => el("li", {}, [
+          el("strong", { texto: dataCurta(n.em) + ": " + n.titulo }), n.texto ? el("span", { texto: " " + n.texto }) : null,
+          n.link ? el("span", {}, [" ", linkSeguro("Abrir ▶", n.link)]) : null,
+        ]))),
+        entendi,
+      ]));
+    }
+    faixa.replaceChildren(...partes);
+    faixa.hidden = !partes.length;
+  }
+  async function conferirVersao() {
+    try {
+      const r = await fetch("versao.json?t=" + Date.now(), { cache: "no-store" });
+      if (!r.ok) return;
+      const v = (await r.json()).versao;
+      if (!v) return;
+      if (versaoCarregada === null) versaoCarregada = v;
+      else if (v !== versaoCarregada && !versaoNova) { versaoNova = true; mostrarFaixa(); }
+    } catch (e) { /* aberto sem a publicação (arquivo local): sem conferência */ }
+  }
+  mostrarFaixa();
+  conferirVersao();
+  setInterval(conferirVersao, 5 * 60 * 1000);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") conferirVersao(); });
 })();
