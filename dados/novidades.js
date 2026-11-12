@@ -2,6 +2,13 @@ window.NOVIDADES = {
   "explicacao": "A cada atualização do guia, acrescente uma entrada no topo da lista: id único (data e um nome curto), em (AAAA-MM-DD), titulo, texto e link (https:// ou rota interna, como #/tarefas). A página mostra à Marcelle as entradas que ela ainda não viu, e a publicação manda o aviso por email (menção no GitHub). Nunca coloque dado pessoal de assistido nem chave: este arquivo é público.",
   "lista": [
     {
+      "id": "2026-11-12-tarefa-atualizada",
+      "em": "2026-11-12",
+      "titulo": "Os cartões mostram quando a tarefa foi atualizada",
+      "texto": "Cada tarefa que mudou depois do lançamento ganhou o selo roxo \"Atualizada em\", visível mesmo com o cartão minimizado, e a ficha \"Atualizada em\" diz o que mudou. A T4 foi atualizada em 12/11; a T3 e as T5 a T8, em 11/11.",
+      "link": "#/tarefas"
+    },
+    {
       "id": "2026-11-12-t4-botoes",
       "em": "2026-11-12",
       "titulo": "T4 ajustada depois da sua entrega: no \"Pode ser assim?\", só os botões",

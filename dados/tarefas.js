@@ -333,6 +333,8 @@ window.TAREFAS = {
       ],
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
+      "atualizada_em": "2026-11-11",
+      "atualizacao": "sem a pergunta do CPF no começo; a Maria reconhece a pessoa pelo idUsuario",
       "prazo": "2026-11-13",
       "status": "lancada",
       "entrega": {
@@ -461,6 +463,8 @@ window.TAREFAS = {
       ],
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
+      "atualizada_em": "2026-11-12",
+      "atualizacao": "no \"Pode ser assim?\", só os botões; o passo 4 não se aplica na Tykhe",
       "prazo": "2026-11-13",
       "status": "lancada",
       "entrega": {
@@ -607,6 +611,8 @@ window.TAREFAS = {
       ],
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
+      "atualizada_em": "2026-11-11",
+      "atualizacao": "a conversa nova não começa com pergunta, e a Maria retoma sozinha o assunto guardado",
       "prazo": "2026-11-13",
       "status": "lancada",
       "entrega": {
@@ -741,6 +747,8 @@ window.TAREFAS = {
       ],
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
+      "atualizada_em": "2026-11-11",
+      "atualizacao": "resumo da conversa no fim e um botão por assunto em aberto, mais \"Encerrar a conversa\"",
       "prazo": "2026-11-13",
       "status": "lancada",
       "entrega": {
@@ -901,6 +909,8 @@ window.TAREFAS = {
       ],
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
+      "atualizada_em": "2026-11-11",
+      "atualizacao": "o botão de cada assunto abre direto, e entrou o \"Encerrar a conversa\"",
       "prazo": "2026-11-13",
       "status": "lancada",
       "entrega": {
@@ -1042,6 +1052,8 @@ window.TAREFAS = {
       ],
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
+      "atualizada_em": "2026-11-11",
+      "atualizacao": "os casos 2, 3 e 6 esperam o fim novo da conversa",
       "prazo": "2026-11-13",
       "status": "lancada",
       "entrega": {

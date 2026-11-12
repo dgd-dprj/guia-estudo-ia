@@ -294,6 +294,7 @@ textarea {
 .selo.refazer { background: #ec835a; color: #0b0b0b; }
 .selo.bom { background: #0ca30c; color: #fff; }
 .selo.critico { background: #d03b3b; color: #fff; }
+.selo.atualizada { background: #7b5cd6; color: #fff; }
 .prazo { white-space: nowrap; }
 .prazo.critico, .prazo.atraso { color: #ff8a80; }
 .prazo.bom { color: #7ee787; }

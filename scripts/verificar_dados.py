@@ -62,6 +62,12 @@ def verificar_tarefas(t: dict, ids_modulo: set[str]) -> list[str]:
             problemas.append(f"{nome}: status precisa ser um de {sorted(STATUS)}")
         if not data_ok(x.get("lancada_em")):
             problemas.append(f"{nome}: 'lancada_em' precisa ser AAAA-MM-DD")
+        if not data_ok(x.get("atualizada_em"), opcional=True):
+            problemas.append(f"{nome}: 'atualizada_em' precisa ser AAAA-MM-DD ou null")
+        elif x.get("atualizada_em") and data_ok(x.get("lancada_em")) and str(x["atualizada_em"]) < str(x["lancada_em"]):
+            problemas.append(f"{nome}: 'atualizada_em' não pode ser antes de 'lancada_em'")
+        if "atualizacao" in x and not (isinstance(x["atualizacao"], str) and x["atualizacao"].strip()):
+            problemas.append(f"{nome}: 'atualizacao' precisa ser um texto curto do que mudou")
         if not data_ok(x.get("prazo"), opcional=True):
             problemas.append(f"{nome}: 'prazo' precisa ser AAAA-MM-DD ou null")
         if not all(isinstance(n, int) for n in x.get("issues_maria", [])):
