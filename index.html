@@ -41,9 +41,29 @@
 
   <div class="avisos" id="avisos" aria-live="polite"></div>
 
-  <script src="dados/guia.js"></script>
-  <script src="dados/tarefas.js"></script>
-  <script src="dados/novidades.js"></script>
-  <script src="app.js"></script>
+  <script>
+    // Carrega o estilo, os dados e o app sempre na versão publicada (versao.json), para o F5 comum e o
+    // botão "Atualizar a tela" já trazerem o que mudou, sem o navegador reaproveitar arquivo antigo.
+    // Sem versao.json (o guia rodando na máquina, com python -m http.server), usa a hora: sempre o arquivo do disco.
+    (function () {
+      function carregar(versao) {
+        var v = "?v=" + encodeURIComponent(versao);
+        var estilo = document.createElement("link");
+        estilo.rel = "stylesheet";
+        estilo.href = "estilo.css" + v;
+        document.head.appendChild(estilo);
+        ["dados/guia.js", "dados/tarefas.js", "dados/novidades.js", "app.js"].forEach(function (arquivo) {
+          var s = document.createElement("script");
+          s.src = arquivo + v;
+          s.async = false; // na ordem: os dados antes do app
+          document.body.appendChild(s);
+        });
+      }
+      fetch("versao.json?t=" + Date.now(), { cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) { carregar(j && j.versao ? j.versao : String(Date.now())); })
+        .catch(function () { carregar(String(Date.now())); });
+    })();
+  </script>
 </body>
 </html>
