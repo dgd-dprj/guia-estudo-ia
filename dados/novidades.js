@@ -2,6 +2,13 @@ window.NOVIDADES = {
   "explicacao": "A cada atualização do guia, acrescente uma entrada no topo da lista: id único (data e um nome curto), em (AAAA-MM-DD), titulo, texto e link (https:// ou rota interna, como #/tarefas). A página mostra à Marcelle as entradas que ela ainda não viu, e a publicação manda o aviso por email (menção no GitHub). Nunca coloque dado pessoal de assistido nem chave: este arquivo é público.",
   "lista": [
     {
+      "id": "2026-11-12-t4-botoes",
+      "em": "2026-11-12",
+      "titulo": "T4 ajustada depois da sua entrega: no \"Pode ser assim?\", só os botões",
+      "texto": "Você achou que o nó de sim/não da Tykhe não aceita texto livre. Decisão da Nicole: a Maria não muda. No \"Pode ser assim?\", a pessoa usa só os botões Sim e Não; o assunto é digitado só na pergunta \"Qual você quer resolver primeiro?\", num nó de texto comum. O passo 4 virou \"não se aplica na Tykhe\". Falta só anotar o chatId dos três casos, que já funcionaram.",
+      "link": "#/tarefas"
+    },
+    {
       "id": "2026-11-11-fim-da-conversa",
       "em": "2026-11-11",
       "titulo": "T6, T7 e T8 atualizadas: resumo no fim da conversa e botão de encerrar",

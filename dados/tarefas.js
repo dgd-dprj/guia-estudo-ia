@@ -361,7 +361,7 @@ window.TAREFAS = {
       "fase": "m0",
       "descricao": "Mostrar com os botões Sim e Não a pergunta da ordem dos assuntos e tratar a pergunta \"Qual você quer resolver primeiro?\".",
       "objetivo": "Quando a pessoa conta mais de um problema, ela precisa conseguir aceitar ou trocar a ordem com um toque, sem digitar.",
-      "contexto": "Quando o relato tem dois assuntos ou mais, antes de abrir qualquer fluxo a Maria propõe a ordem: \"Entendi. Você falou de duas coisas: … Vou começar pela … Pode ser assim?\". A pergunta chega no mesmo formato da desambiguação de hoje, sem flowId, e a resposta volta para a mesma rota. A ordem padrão é saúde, violência doméstica, pessoa presa e depois o resto. Com Não e três assuntos ou mais, a Maria pergunta qual vem primeiro. Com Não e dois assuntos, ela troca a ordem.",
+      "contexto": "Quando o relato tem dois assuntos ou mais, antes de abrir qualquer fluxo a Maria propõe a ordem: \"Entendi. Você falou de duas coisas: … Vou começar pela … Pode ser assim?\". A pergunta chega no mesmo formato da desambiguação de hoje, sem flowId, e a resposta volta para a mesma rota. A ordem padrão é saúde, violência doméstica, pessoa presa e depois o resto. Com Não e três assuntos ou mais, a Maria pergunta qual vem primeiro. Com Não e dois assuntos, ela troca a ordem. Atualizado em 12/11, depois da sua entrega: o nó de sim/não da Tykhe não aceita texto livre, então a pessoa usa só os botões no \"Pode ser assim?\" e digita o assunto só na pergunta \"Qual você quer resolver primeiro?\". Esse caminho já funcionou no seu caso 3. Nada muda na Maria.",
       "tempo": "Cerca de 2 horas",
       "issues_maria": [
         435,
@@ -406,10 +406,10 @@ window.TAREFAS = {
         "Na cópia, depois do nó da 1ª chamada, crie a condição: status em_andamento, sem flowId e tipoResposta sim_nao.",
         "Nesse caminho, mostre o texto do campo resposta num nó de opções com os botões do campo opcoes (Sim e Não).",
         "Mande o botão escolhido para POST /atendimentos/orquestrador: {\"chatId\": \"<o mesmo>\", \"resposta\": \"true\"} para Sim e \"false\" para Não.",
-        "Se a pessoa escrever em vez de tocar no botão, mande o texto como veio: a Maria entende \"pode\", \"ok\", \"não\" e o nome do assunto.",
-        "Para tipoResposta texto sem flowId (\"Qual você quer resolver primeiro?\" e a desambiguação de hoje), mostre o texto e mande o que a pessoa escrever, do mesmo jeito.",
+        "Não se aplica na Tykhe (atualizado em 12/11): o nó de sim/não só aceita os botões. Pode marcar este passo como feito; a pessoa escolhe a ordem pelo \"Não\" e pela pergunta do passo 5.",
+        "Para tipoResposta texto sem flowId (\"Qual você quer resolver primeiro?\" e a desambiguação de hoje), use um nó de texto comum: mostre o texto e mande o que a pessoa escrever para POST /atendimentos/orquestrador, com o mesmo chatId.",
         "Quando a resposta vier com flowId, siga como hoje, pelo fluxo da Maria (POST /atendimentos/respostas).",
-        "Rode os três casos abaixo e anote o chatId de cada um.",
+        "Rode os três casos abaixo e anote o chatId de cada um. Falta só isto da sua entrega de 11/11: os três casos já funcionaram.",
         "Terminou? Preencha os campos da seção \"Entrega\" e clique em \"📬 Enviar entrega\".",
         "Não terminou até sexta (13/11)? Clique em \"💾 Salvar em arquivo (para o Ícaro)\", no fim deste cartão, e mande o arquivo ao Ícaro. Ele leva os passos que você marcou, o que você anotou e o que falta."
       ],
@@ -424,7 +424,7 @@ window.TAREFAS = {
         },
         {
           "relato": "meu irmão foi preso, o plano negou a cirurgia da minha mãe e quero remarcar meu horário (tocar em Não)",
-          "esperado": "Aparece \"Tudo bem. Qual você quer resolver primeiro?\" com a lista. Respondendo \"o horário\", a Maria começa por ele."
+          "esperado": "Aparece \"Tudo bem. Qual você quer resolver primeiro?\" com a lista, num nó de texto. Escrevendo \"o horário\", a Maria começa por ele. No \"Pode ser assim?\", a pessoa só toca nos botões: escrever ali dá \"Não encontrei uma opção adequada\" na Tykhe, e isso é esperado."
         }
       ],
       "campos_entrega": [
