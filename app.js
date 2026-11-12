@@ -859,6 +859,7 @@
         t.urgente && !foiEntregue(t) ? el("span", { classe: "selo critico", texto: "🚨 Urgente" }) : null,
         t.prioridade && PRIORIDADES[t.prioridade] && t.prioridade !== "normal" ? el("span", { classe: "selo critico", texto: PRIORIDADES[t.prioridade] }) : null,
         seloStatus(t.status),
+        dataValida(t.atualizada_em) ? el("span", { classe: "selo atualizada", texto: "🔄 Atualizada em " + dataLonga(t.atualizada_em) }) : null,
         minimizar,
       ]),
       // Visível só com o cartão minimizado: o prazo e os passos feitos.
@@ -868,6 +869,7 @@
       el("dl", { classe: "fichas" }, [
         ficha("Fase", t.fase ? linkSeguro(nomeFase(t.fase), "#/modulo/" + t.fase + "/6") : "—"),
         ficha("Lançada por", (t.lancada_por || "—") + " em " + dataLonga(t.lancada_em)),
+        dataValida(t.atualizada_em) ? ficha("Atualizada em", dataLonga(t.atualizada_em) + (t.atualizacao ? ": " + t.atualizacao : "")) : null,
         ficha("Prazo", el("span", {}, [textoPrazo(t) + " ", el("span", { classe: "prazo " + prazo.classe, texto: prazo.texto })])),
         ficha("Issues da Maria", issuesDaMaria(t.issues_maria)),
         ficha("Entrega", entrega.link ? linkSeguro("abrir a entrega", entrega.link) : dataValida(entrega.em) ? dataLonga(entrega.em) : "—"),
