@@ -2,6 +2,13 @@ window.NOVIDADES = {
   "explicacao": "A cada atualização do guia, acrescente uma entrada no topo da lista: id único (data e um nome curto), em (AAAA-MM-DD), titulo, texto e link (https:// ou rota interna, como #/tarefas). A página mostra à Marcelle as entradas que ela ainda não viu, e a publicação manda o aviso por email (menção no GitHub). Nunca coloque dado pessoal de assistido nem chave: este arquivo é público.",
   "lista": [
     {
+      "id": "2026-11-13-campos-flowid-tipocaso",
+      "em": "2026-11-13",
+      "titulo": "T6 e T7: o assunto vai nos campos \"flowId\" ou \"tipoCaso\"",
+      "texto": "Ajuste do mesmo dia (PR #495 da Maria): para abrir um assunto na rota do próximo assunto, mande o mesmo campo do item de assuntosEmAberto, \"flowId\" (assunto da Maria) ou \"tipoCaso\" (assunto da Tykhe), e não mais \"assunto\". Exemplo: {\"chatId\": \"<conversa>\", \"tipoCaso\": \"agendamentos\"}. O que você já montou com \"assunto\" não quebra: ele continua aceito. Vale no release quando o PR chegar lá; a Nicole avisa.",
+      "link": "#/tarefas"
+    },
+    {
       "id": "2026-11-13-assunto-pelo-flowid",
       "em": "2026-11-13",
       "titulo": "T4 a T8 atualizadas: o assunto pelo flowId, a ordem nova e as listas numeradas",

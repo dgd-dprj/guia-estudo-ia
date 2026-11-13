@@ -685,7 +685,7 @@ window.TAREFAS = {
         {
           "nome": "flowId ou tipoCaso (o id do assunto, 13/11)",
           "onde": "Cada item de assuntosEmAberto",
-          "como": "No lugar do chatIdAssunto, que saiu. Assunto da Maria: o flowId (pessoa presa 3df874f2-675a-4c43-9ec7-480f7c702f50, violência doméstica cabb2495-4e12-4f4a-9956-3d20649059bc, plano de saúde 84433c84-4776-4b05-a5a0-af8012d8eced). Assunto da Tykhe: o tipoCaso (saude, novo-processo, andamento-processo, agendamentos, ajuda-app, outros). Cada um aparece uma vez só na lista. É o que abre aquele assunto na rota do próximo assunto, em \"assunto\" (T7)."
+          "como": "No lugar do chatIdAssunto, que saiu. Assunto da Maria: o flowId (pessoa presa 3df874f2-675a-4c43-9ec7-480f7c702f50, violência doméstica cabb2495-4e12-4f4a-9956-3d20649059bc, plano de saúde 84433c84-4776-4b05-a5a0-af8012d8eced). Assunto da Tykhe: o tipoCaso (saude, novo-processo, andamento-processo, agendamentos, ajuda-app, outros). Cada um aparece uma vez só na lista. É o que abre aquele assunto na rota do próximo assunto, no campo de mesmo nome: \"flowId\" ou \"tipoCaso\" (T7)."
         },
         {
           "nome": "resumoDaConversa",
@@ -782,7 +782,7 @@ window.TAREFAS = {
       "fase": "m0",
       "descricao": "Ligar os caminhos que saem do fim do assunto: o urgente abre pela rota do próximo assunto; o botão de um assunto em aberto abre esse assunto; \"Falar de um assunto novo\" começa outra conversa; \"Encerrar a conversa\" fecha.",
       "objetivo": "A pessoa resolve o que ainda falta sem repetir o que já contou, escolhendo um assunto em aberto, começando um assunto novo ou encerrando a conversa.",
-      "contexto": "Quem cria o chatId de cada assunto é a Maria (<chatId>-assunto-2, -3). A Tykhe só manda o chatId da conversa. Os botões do fim e o próximo urgente vão todos para POST /atendimentos/proximo-assunto: sem resposta, abre o próximo da fila; com \"resposta\" igual ao texto do botão (ou só o número dele), abre o assunto escolhido ou, com \"Encerrar a conversa\", fecha. Mudou em 13/11 (PR #485): para abrir um assunto direto, sem a resposta da pessoa, mande em \"assunto\" o flowId ou o tipoCaso do item de assuntosEmAberto (o chatIdAssunto saiu da resposta); os botões vêm numerados; e a lista da rota dos assuntos em aberto também tem \"Encerrar a conversa\". O assunto novo é uma conversa nova no orquestrador, com chatId novo e o mesmo idUsuario. A rota POST /atendimentos/assuntos-em-aberto continua existindo para mostrar a lista em outro momento, mas os botões do fim não precisam dela.",
+      "contexto": "Quem cria o chatId de cada assunto é a Maria (<chatId>-assunto-2, -3). A Tykhe só manda o chatId da conversa. Os botões do fim e o próximo urgente vão todos para POST /atendimentos/proximo-assunto: sem resposta, abre o próximo da fila; com \"resposta\" igual ao texto do botão (ou só o número dele), abre o assunto escolhido ou, com \"Encerrar a conversa\", fecha. Mudou em 13/11 (PR #485 e PR #495): para abrir um assunto direto, sem a resposta da pessoa, mande o mesmo campo do item de assuntosEmAberto: \"flowId\" para um assunto da Maria ou \"tipoCaso\" para um da Tykhe (o chatIdAssunto saiu da resposta; o campo antigo \"assunto\" ainda é aceito); os botões vêm numerados; e a lista da rota dos assuntos em aberto também tem \"Encerrar a conversa\". O assunto novo é uma conversa nova no orquestrador, com chatId novo e o mesmo idUsuario. A rota POST /atendimentos/assuntos-em-aberto continua existindo para mostrar a lista em outro momento, mas os botões do fim não precisam dela.",
       "tempo": "Cerca de 3 horas",
       "issues_maria": [
         450,
@@ -795,12 +795,12 @@ window.TAREFAS = {
         {
           "nome": "POST /atendimentos/proximo-assunto",
           "onde": "Rota, só no release",
-          "como": "Corpo {\"chatId\": \"<chatId da conversa>\"} abre o próximo da fila (o urgente da T6). Com \"resposta\": \"<texto do botão>\" (por exemplo \"1. O seu processo\", ou só \"1\"), abre o escolhido. Com \"assunto\": \"<flowId ou tipoCaso do item>\" (13/11), abre aquele assunto direto."
+          "como": "Corpo {\"chatId\": \"<chatId da conversa>\"} abre o próximo da fila (o urgente da T6). Com \"resposta\": \"<texto do botão>\" (por exemplo \"1. O seu processo\", ou só \"1\"), abre o escolhido. Com \"flowId\" ou \"tipoCaso\" do item (13/11), abre aquele assunto direto."
         },
         {
-          "nome": "\"assunto\": flowId ou tipoCaso (13/11)",
+          "nome": "\"flowId\" ou \"tipoCaso\" no corpo (13/11)",
           "onde": "Corpo de POST /atendimentos/proximo-assunto",
-          "como": "Assunto da Maria, pelo flowId: pessoa presa 3df874f2-675a-4c43-9ec7-480f7c702f50, violência doméstica cabb2495-4e12-4f4a-9956-3d20649059bc, plano de saúde 84433c84-4776-4b05-a5a0-af8012d8eced. Assunto da Tykhe, pelo tipoCaso: saude, novo-processo, andamento-processo, agendamentos, ajuda-app, outros. Exemplo: {\"chatId\": \"<chatId da conversa>\", \"assunto\": \"andamento-processo\"}. Um id que não está em aberto para a pessoa dá 404."
+          "como": "O mesmo campo do item de assuntosEmAberto. Assunto da Maria, em \"flowId\": pessoa presa 3df874f2-675a-4c43-9ec7-480f7c702f50, violência doméstica cabb2495-4e12-4f4a-9956-3d20649059bc, plano de saúde 84433c84-4776-4b05-a5a0-af8012d8eced. Assunto da Tykhe, em \"tipoCaso\": saude, novo-processo, andamento-processo, agendamentos, ajuda-app, outros. Exemplos: {\"chatId\": \"<chatId da conversa>\", \"flowId\": \"3df874f2-675a-4c43-9ec7-480f7c702f50\"} e {\"chatId\": \"<chatId da conversa>\", \"tipoCaso\": \"andamento-processo\"}. Um id que não está em aberto para a pessoa dá 404. O campo antigo \"assunto\" ainda é aceito, e o que já foi montado com ele não quebra."
         },
         {
           "nome": "chatId (na resposta)",
@@ -846,7 +846,7 @@ window.TAREFAS = {
       "passos": [
         "Crie o nó de API POST /atendimentos/proximo-assunto no release, com o corpo {\"chatId\": \"<chatId da conversa>\"}. Ligue ao caminho \"abrir o próximo\" da T6 (urgente na vez).",
         "Guarde o chatId que vem na resposta numa variável própria e use em todas as chamadas desse assunto. Com flowId, siga pelo fluxo; com redirecionado, pelo tipoCaso; com 404, encerre.",
-        "Ligue os botões de assunto da T6 (todos menos os dois últimos) a POST /atendimentos/proximo-assunto com {\"chatId\": \"<chatId da conversa>\", \"resposta\": \"<texto do botão, com o número>\"}. Se for mais fácil na Tykhe, mande \"assunto\" com o flowId ou o tipoCaso do item de assuntosEmAberto (13/11). Depois, igual ao passo 2.",
+        "Ligue os botões de assunto da T6 (todos menos os dois últimos) a POST /atendimentos/proximo-assunto com {\"chatId\": \"<chatId da conversa>\", \"resposta\": \"<texto do botão, com o número>\"}. Se for mais fácil na Tykhe, mande o mesmo campo do item de assuntosEmAberto: \"flowId\" ou \"tipoCaso\" (13/11). Depois, igual ao passo 2.",
         "Ligue o botão \"Encerrar a conversa\" (o último, já numerado) à mesma rota, com \"resposta\" igual ao texto do botão. Mostre a resposta e encerre a conversa na Tykhe. Na lista da rota dos assuntos em aberto, o encerrar também aparece (13/11).",
         "Se a resposta for \"Pode me contar o que você precisa?\" (_links.responder para o orquestrador), ou se a pessoa tocar em \"Falar de um assunto novo\": mostre a pergunta e mande a resposta como conversa nova, POST /atendimentos/orquestrador com chatId novo, \"mensagem\" e o mesmo idUsuario.",
         "Quando o assunto aberto terminar, volte à T6 com a nova resposta final.",
@@ -861,7 +861,7 @@ window.TAREFAS = {
         },
         {
           "relato": "meu filho foi preso e eu queria saber como está o meu processo de pensão (Sim; pessoa presa até o fim; tocar no botão \"1. O seu processo\")",
-          "esperado": "Vem redirecionado com tipoCaso andamento-processo e o chatId -assunto-2. O mesmo acontece mandando \"assunto\": \"andamento-processo\"."
+          "esperado": "Vem redirecionado com tipoCaso andamento-processo e o chatId -assunto-2. O mesmo acontece mandando \"tipoCaso\": \"andamento-processo\"."
         },
         {
           "relato": "o mesmo caso, tocando em \"Falar de um assunto novo\" e escrevendo \"quero remarcar meu horário\"",
@@ -920,7 +920,7 @@ window.TAREFAS = {
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
       "atualizada_em": "2026-11-13",
-      "atualizacao": "abrir o assunto pelo flowId ou tipoCaso em \"assunto\", botões numerados e o encerrar também na lista",
+      "atualizacao": "abrir o assunto pelos campos \"flowId\" ou \"tipoCaso\" no corpo, botões numerados e o encerrar também na lista",
       "prazo": "2026-11-13",
       "status": "lancada",
       "entrega": {
