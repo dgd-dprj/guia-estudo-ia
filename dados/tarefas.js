@@ -363,7 +363,7 @@ window.TAREFAS = {
       "fase": "m0",
       "descricao": "Mostrar com os botões Sim e Não a pergunta da ordem dos assuntos e tratar a pergunta \"Qual você quer resolver primeiro?\".",
       "objetivo": "Quando a pessoa conta mais de um problema, ela precisa conseguir aceitar ou trocar a ordem com um toque, sem digitar.",
-      "contexto": "Quando o relato tem dois assuntos ou mais, antes de abrir qualquer fluxo a Maria propõe a ordem: \"Entendi. Você falou de duas coisas: … Vou começar pela … Pode ser assim?\". A pergunta chega no mesmo formato da desambiguação de hoje, sem flowId, e a resposta volta para a mesma rota. A ordem padrão é saúde, violência doméstica, pessoa presa e depois o resto. Com Não e três assuntos ou mais, a Maria pergunta qual vem primeiro. Com Não e dois assuntos, ela troca a ordem. Atualizado em 12/11, depois da sua entrega: o nó de sim/não da Tykhe não aceita texto livre, então a pessoa usa só os botões no \"Pode ser assim?\" e digita o assunto só na pergunta \"Qual você quer resolver primeiro?\". Esse caminho já funcionou no seu caso 3. Nada muda na Maria.",
+      "contexto": "Quando o relato tem dois assuntos ou mais, antes de abrir qualquer fluxo a Maria propõe a ordem: \"Entendi. Você falou de duas coisas: … Vou começar pela … Pode ser assim?\". A pergunta chega no mesmo formato da desambiguação de hoje, sem flowId, e a resposta volta para a mesma rota. A ordem padrão é violência doméstica, pessoa presa, saúde (com o plano de saúde) e depois o resto (mudou em 13/11: antes, a saúde vinha primeiro). Com Não e três assuntos ou mais, a Maria pergunta qual vem primeiro. Com Não e dois assuntos, ela troca a ordem. Atualizado em 12/11, depois da sua entrega: o nó de sim/não da Tykhe não aceita texto livre, então a pessoa usa só os botões no \"Pode ser assim?\". Mudou em 13/11 (PR #485 da Maria): \"Qual você quer resolver primeiro?\" passa a vir com botões numerados (tipoResposta \"opcoes\", por exemplo \"1. A situação que você contou\") e a legenda \"Responda com o número da opção.\". A pessoa toca no botão ou digita o número. Vale no release depois que o PR #485 chegar lá (a Nicole avisa).",
       "tempo": "Cerca de 2 horas",
       "issues_maria": [
         435,
@@ -394,8 +394,13 @@ window.TAREFAS = {
           "como": "Sim vira \"true\"; Não vira \"false\"."
         },
         {
+          "nome": "tipoResposta: \"opcoes\", sem flowId (13/11)",
+          "onde": "Resposta com \"Qual você quer resolver primeiro?\"",
+          "como": "Mostrar o texto inteiro e um botão para cada item de opcoes, que já vem numerado (\"1. A situação que você contou\", \"2. A pessoa presa\"…). Mandar o texto do botão (ou só o número) na mesma rota."
+        },
+        {
           "nome": "tipoResposta: \"texto\", sem flowId",
-          "onde": "Resposta com \"Qual você quer resolver primeiro?\" (ou a desambiguação de hoje)",
+          "onde": "Resposta com a desambiguação de hoje",
           "como": "Mostrar o texto e mandar o que a pessoa escrever, na mesma rota."
         },
         {
@@ -409,7 +414,7 @@ window.TAREFAS = {
         "Nesse caminho, mostre o texto do campo resposta num nó de opções com os botões do campo opcoes (Sim e Não).",
         "Mande o botão escolhido para POST /atendimentos/orquestrador: {\"chatId\": \"<o mesmo>\", \"resposta\": \"true\"} para Sim e \"false\" para Não.",
         "Não se aplica na Tykhe (atualizado em 12/11): o nó de sim/não só aceita os botões. Pode marcar este passo como feito; a pessoa escolhe a ordem pelo \"Não\" e pela pergunta do passo 5.",
-        "Para tipoResposta texto sem flowId (\"Qual você quer resolver primeiro?\" e a desambiguação de hoje), use um nó de texto comum: mostre o texto e mande o que a pessoa escrever para POST /atendimentos/orquestrador, com o mesmo chatId.",
+        "Para \"Qual você quer resolver primeiro?\" (tipoResposta opcoes sem flowId, 13/11), use um nó de opções: mostre o texto inteiro e os botões do campo opcoes, na ordem. Mande o texto do botão escolhido (ou só o número) para POST /atendimentos/orquestrador, com o mesmo chatId. Para tipoResposta texto sem flowId (a desambiguação de hoje), continue com o nó de texto comum.",
         "Quando a resposta vier com flowId, siga como hoje, pelo fluxo da Maria (POST /atendimentos/respostas).",
         "Rode os três casos abaixo e anote o chatId de cada um. Falta só isto da sua entrega de 11/11: os três casos já funcionaram.",
         "Terminou? Preencha os campos da seção \"Entrega\" e clique em \"📬 Enviar entrega\".",
@@ -418,15 +423,15 @@ window.TAREFAS = {
       "casos_teste": [
         {
           "relato": "meu irmão foi preso ontem e o plano de saúde negou a cirurgia da minha mãe (tocar em Sim)",
-          "esperado": "Aparece \"Pode ser assim?\" com Sim e Não. Com Sim, abre o plano de saúde, começando por \"Combinado. Vamos começar pelo plano de saúde.\""
+          "esperado": "Aparece \"Pode ser assim?\" com Sim e Não. Com Sim, abre a pessoa presa, começando por \"Combinado. Vamos começar pela pessoa presa.\" (ordem de 13/11; antes do PR #485 no release, ainda começa pelo plano de saúde)."
         },
         {
           "relato": "o mesmo relato (tocar em Não)",
-          "esperado": "Com dois assuntos, a Maria troca a ordem e começa pela pessoa presa."
+          "esperado": "Com dois assuntos, a Maria troca a ordem e começa pelo plano de saúde."
         },
         {
           "relato": "meu irmão foi preso, o plano negou a cirurgia da minha mãe e quero remarcar meu horário (tocar em Não)",
-          "esperado": "Aparece \"Tudo bem. Qual você quer resolver primeiro?\" com a lista, num nó de texto. Escrevendo \"o horário\", a Maria começa por ele. No \"Pode ser assim?\", a pessoa só toca nos botões: escrever ali dá \"Não encontrei uma opção adequada\" na Tykhe, e isso é esperado."
+          "esperado": "Aparece \"Tudo bem. Qual você quer resolver primeiro?\" com a lista numerada (1. A pessoa presa, 2. O plano de saúde, 3. O seu horário marcado), os botões e \"Responda com o número da opção.\". Tocando em \"3. O seu horário marcado\" (ou digitando 3), a Maria começa por ele. No \"Pode ser assim?\", a pessoa só toca nos botões: escrever ali dá \"Não encontrei uma opção adequada\" na Tykhe, e isso é esperado."
         }
       ],
       "campos_entrega": [
@@ -451,7 +456,7 @@ window.TAREFAS = {
       "pronto_quando": [
         "Os botões Sim e Não aparecem no \"Pode ser assim?\".",
         "A escolha volta para a Maria como \"true\" ou \"false\", com o mesmo chatId.",
-        "\"Qual você quer resolver primeiro?\" aparece e a resposta da pessoa volta para a mesma rota.",
+        "\"Qual você quer resolver primeiro?\" aparece com os botões numerados, e o botão (ou o número) volta para a mesma rota.",
         "Um relato de um assunto só continua igual a hoje."
       ],
       "cuidados": [
@@ -463,8 +468,8 @@ window.TAREFAS = {
       ],
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
-      "atualizada_em": "2026-11-12",
-      "atualizacao": "no \"Pode ser assim?\", só os botões; o passo 4 não se aplica na Tykhe",
+      "atualizada_em": "2026-11-13",
+      "atualizacao": "ordem nova (violência, pessoa presa, saúde) e \"Qual você quer resolver primeiro?\" com botões numerados",
       "prazo": "2026-11-13",
       "status": "lancada",
       "entrega": {
@@ -513,11 +518,11 @@ window.TAREFAS = {
         {
           "nome": "tipoResposta: \"opcoes\"",
           "onde": "Na mesma resposta, quando a pessoa pediu para ver os assuntos",
-          "como": "É a lista \"Qual você quer resolver agora?\": mostrar cada item de opcoes como botão ou lista."
+          "como": "É a lista \"Qual você quer resolver agora?\": mostrar cada item de opcoes como botão. Desde 13/11 (PR #485), os botões já vêm numerados (\"1. O seu processo\") e o texto traz \"Urgente:\", \"Menos urgente:\", \"Outras opções:\" e \"Responda com o número da opção.\"."
         },
         {
-          "nome": "\"Nenhum, quero um assunto novo\"",
-          "onde": "Sempre a última opção da lista",
+          "nome": "\"N. Nenhum, quero um assunto novo\"",
+          "onde": "Sempre a última opção da lista, com o número logo depois dos assuntos",
           "como": "A Maria pergunta \"Pode me contar o que você precisa?\"."
         },
         {
@@ -539,7 +544,7 @@ window.TAREFAS = {
       "passos": [
         "Na cópia, confira que a 1ª mensagem de quem já tem assunto guardado segue direto, sem pergunta: nada a montar, só testar (casos 1 e 2).",
         "Para a lista, crie a condição: status em_andamento, sem flowId e tipoResposta opcoes. Mostre o texto do campo resposta inteiro (ele pode ter os grupos \"Urgente:\" e \"Menos urgente:\") e as opções como botões ou lista.",
-        "Mande o texto exato do botão escolhido para POST /atendimentos/orquestrador, com o mesmo chatId. O número da opção (1, 2, 3) também vale.",
+        "Mande o texto exato do botão escolhido (com o número, por exemplo \"1. O seu processo\") para POST /atendimentos/orquestrador, com o mesmo chatId. Só o número (1, 2, 3) também vale, e é o que a legenda pede à pessoa.",
         "Se a resposta seguinte vier com flowId, siga pelo fluxo da Maria; se vier com status redirecionado, siga pelo tipoCaso, como hoje.",
         "\"Pode me contar o que você precisa?\" no começo da conversa é uma pergunta de texto do orquestrador: mostre e mande a resposta da pessoa para a mesma rota, com o mesmo chatId.",
         "Rode os casos abaixo e anote o chatId de cada conversa.",
@@ -549,7 +554,7 @@ window.TAREFAS = {
       "casos_teste": [
         {
           "relato": "Conversa A, com o idUsuario teste-marcelle-2: \"meu filho foi preso e eu queria saber como está o meu processo de pensão\". Toque em Sim e leve a pessoa presa até o fim.",
-          "esperado": "No fim, o resumo da conversa (\"Resumo da nossa conversa: • A pessoa presa: dados confirmados e encaminhados (código …)\") e \"Ainda em aberto: • O seu processo · menos urgente · em aberto até dd/mm · ainda não começou\" (os botões são da T6)."
+          "esperado": "No fim, o resumo da conversa (\"Resumo da nossa conversa: • A pessoa presa: dados confirmados e encaminhados (código …)\") e, desde 13/11, \"Ainda em aberto:\" com \"Menos urgente: 1. O seu processo (guardado até dd/mm, ainda não começou)\" (os botões são da T6)."
         },
         {
           "relato": "Conversa B, chatId novo e o mesmo idUsuario: \"queria saber como está o meu processo\"",
@@ -557,7 +562,7 @@ window.TAREFAS = {
         },
         {
           "relato": "Conversa C, chatId novo e o mesmo idUsuario teste-marcelle-2, depois de refazer a conversa A: \"quero ver meus assuntos\"",
-          "esperado": "Aparece \"Qual você quer resolver agora?\" com \"O seu processo\" e \"Nenhum, quero um assunto novo\". Escolhendo \"O seu processo\", vem redirecionado com tipoCaso andamento-processo."
+          "esperado": "Aparece \"Qual você quer resolver agora?\" com \"Menos urgente: 1. O seu processo\", \"Outras opções: 2. Nenhum, quero um assunto novo\" e \"Responda com o número da opção.\". Tocando em \"1. O seu processo\" (ou digitando 1), vem redirecionado com tipoCaso andamento-processo."
         },
         {
           "relato": "Conversa D: \"quero ver meus assuntos\" e depois \"Nenhum, quero um assunto novo\"",
@@ -611,8 +616,8 @@ window.TAREFAS = {
       ],
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
-      "atualizada_em": "2026-11-11",
-      "atualizacao": "a conversa nova não começa com pergunta, e a Maria retoma sozinha o assunto guardado",
+      "atualizada_em": "2026-11-13",
+      "atualizacao": "a lista dos assuntos em aberto vem numerada, com os botões do mesmo número",
       "prazo": "2026-11-13",
       "status": "lancada",
       "entrega": {
@@ -641,7 +646,7 @@ window.TAREFAS = {
       "fase": "m0",
       "descricao": "Na resposta final de cada assunto, ler a urgência do próximo e, quando vierem, mostrar os botões de opcoesDoFim: um por assunto em aberto, \"Falar de um assunto novo\" e \"Encerrar a conversa\".",
       "objetivo": "O assunto urgente da conversa abre logo. Quando não há urgente na vez, a pessoa vê, uma vez só e no fim, o resumo do que foi atendido e o que ainda está em aberto, e escolhe: continuar um assunto, falar de um novo ou encerrar.",
-      "contexto": "Quando um assunto termina em concluido, a resposta final pode trazer assuntosPendentes (os outros assuntos desta conversa, cada um com urgencia). Com um urgente na vez, o texto avisa \"Ainda falta um assunto urgente: … Vamos falar dele agora.\", e o fim da conversa fica para o fim dele. Sem urgente na vez, vem o fim da conversa: o texto traz \"Resumo da nossa conversa:\" (cada assunto atendido, com o desfecho e um código de 6 letras e números), \"Quer continuar com algum desses assuntos ou encerrar a conversa?\" e \"Ainda em aberto:\" (urgência, \"em aberto até dd/mm\" e a fase). Os campos: resumoDaConversa, assuntosEmAberto (só quando há) e opcoesDoFim (sempre). Sem nada em aberto, a pergunta é \"Quer falar de um assunto novo ou encerrar a conversa?\", e os botões são só esses dois.",
+      "contexto": "Quando um assunto termina em concluido, a resposta final pode trazer assuntosPendentes (os outros assuntos desta conversa, cada um com urgencia). Com um urgente na vez, o texto avisa \"Ainda falta um assunto urgente: … Vamos falar dele agora.\", e o fim da conversa fica para o fim dele. Sem urgente na vez, vem o fim da conversa. Mudou em 13/11 (PR #485): o texto traz \"Resumo da nossa conversa:\" (cada assunto atendido, com o desfecho e um código de 6 letras e números), a pergunta \"Quer continuar com algum dos assuntos em aberto ou encerrar a conversa?\", \"Ainda em aberto:\" com os assuntos numerados em \"Urgente:\" e \"Menos urgente:\" (os detalhes entre parênteses), \"Outras opções:\" (\"Falar de um assunto novo\" e \"Encerrar a conversa\", numerados em seguida) e \"Responda com o número da opção.\". Os botões de opcoesDoFim levam o mesmo número (\"1. O seu processo\"). Em assuntosEmAberto, o id do assunto passa a ser o flowId (assunto da Maria) ou o tipoCaso (assunto da Tykhe); o chatIdAssunto saiu. Os campos: resumoDaConversa, assuntosEmAberto (só quando há) e opcoesDoFim (sempre). Sem nada em aberto, a pergunta é \"Quer falar de um assunto novo ou encerrar a conversa?\", e os botões são \"1. Falar de um assunto novo\" e \"2. Encerrar a conversa\". No atendimento humano com outro assunto pendente, o texto agora termina com \"Também ficou para depois: …\".",
       "tempo": "Cerca de 2 horas",
       "issues_maria": [
         450,
@@ -660,7 +665,7 @@ window.TAREFAS = {
         {
           "nome": "status: \"handoff_humano\"",
           "onde": "Resposta final",
-          "como": "A pessoa vai para o atendimento humano. Não abrir nada; mostrar os nomes de assuntosPendentes na nota para quem vai atender."
+          "como": "A pessoa vai para o atendimento humano. Não abrir nada; mostrar os nomes de assuntosPendentes na nota para quem vai atender. Desde 13/11, o texto já avisa a pessoa (\"Também ficou para depois: …\"): é só mostrar o campo resposta inteiro."
         },
         {
           "nome": "assuntosPendentes[0].urgencia",
@@ -670,17 +675,17 @@ window.TAREFAS = {
         {
           "nome": "opcoesDoFim",
           "onde": "Resposta final concluido, sem urgente na vez",
-          "como": "Os botões, na ordem: um por assunto em aberto (por exemplo, \"O seu processo\"), \"Falar de um assunto novo\" e, por último, \"Encerrar a conversa\". Mostrar como botões; o que cada um faz está na T7."
+          "como": "Os botões, na ordem e já numerados (13/11): um por assunto em aberto (por exemplo, \"1. O seu processo\"), \"Falar de um assunto novo\" e, por último, \"Encerrar a conversa\" (por exemplo, \"2. Falar de um assunto novo\" e \"3. Encerrar a conversa\"). Mostrar como botões, com o texto como vem; o que cada um faz está na T7."
         },
         {
           "nome": "assuntosEmAberto",
           "onde": "Junto de opcoesDoFim, quando há assunto em aberto",
-          "como": "A lista das pendências, na ordem dos botões: nome, urgencia, chatIdAssunto (o id do assunto), codigo, fase e venceEm (a data em que o guardado vence). Guardar numa variável; a T7 usa."
+          "como": "A lista das pendências, na ordem dos botões: nome, urgente, urgencia, codigo, fase, venceEm (a data em que o guardado vence) e flowId OU tipoCaso. Guardar numa variável; a T7 usa."
         },
         {
-          "nome": "chatIdAssunto",
+          "nome": "flowId ou tipoCaso (o id do assunto, 13/11)",
           "onde": "Cada item de assuntosEmAberto",
-          "como": "O id do assunto (por exemplo, <chatId>-assunto-2). É o que abre aquele assunto na rota do próximo assunto (T7)."
+          "como": "No lugar do chatIdAssunto, que saiu. Assunto da Maria: o flowId (pessoa presa 3df874f2-675a-4c43-9ec7-480f7c702f50, violência doméstica cabb2495-4e12-4f4a-9956-3d20649059bc, plano de saúde 84433c84-4776-4b05-a5a0-af8012d8eced). Assunto da Tykhe: o tipoCaso (saude, novo-processo, andamento-processo, agendamentos, ajuda-app, outros). Cada um aparece uma vez só na lista. É o que abre aquele assunto na rota do próximo assunto, em \"assunto\" (T7)."
         },
         {
           "nome": "resumoDaConversa",
@@ -694,7 +699,7 @@ window.TAREFAS = {
         "Crie a condição: status concluido e assuntosPendentes[0].urgencia igual a \"urgente\". Nesse caminho, siga para \"abrir o próximo\" (T7).",
         "Crie a condição: status concluido e opcoesDoFim existe. Nesse caminho, mostre um botão para cada item de opcoesDoFim, na ordem. O que cada botão faz segue na T7.",
         "Sem urgente e sem opcoesDoFim (atendimento que não passou pelo orquestrador), encerre como hoje.",
-        "Com status handoff_humano, não abra nada: escreva os nomes de assuntosPendentes na nota para o atendimento humano.",
+        "Com status handoff_humano, não abra nada: mostre o texto inteiro (desde 13/11 ele termina com \"Também ficou para depois: …\") e escreva os nomes de assuntosPendentes na nota para o atendimento humano.",
         "Rode os casos abaixo e anote o chatId de cada um.",
         "Terminou? Preencha os campos da seção \"Entrega\" e clique em \"📬 Enviar entrega\".",
         "Não terminou até sexta (13/11)? Clique em \"💾 Salvar em arquivo (para o Ícaro)\", no fim deste cartão, e mande o arquivo ao Ícaro. Ele leva os passos que você marcou, o que você anotou e o que falta."
@@ -702,15 +707,15 @@ window.TAREFAS = {
       "casos_teste": [
         {
           "relato": "meu filho foi preso e eu queria saber como está o meu processo de pensão (Sim; leve a pessoa presa até o fim)",
-          "esperado": "Fim concluido com \"Resumo da nossa conversa: • A pessoa presa: dados confirmados e encaminhados (código …)\", \"Quer continuar com algum desses assuntos ou encerrar a conversa?\" e \"Ainda em aberto: • O seu processo · menos urgente · em aberto até dd/mm · ainda não começou\". Aparecem três botões: \"O seu processo\", \"Falar de um assunto novo\" e \"Encerrar a conversa\"."
+          "esperado": "Fim concluido com \"Resumo da nossa conversa: • A pessoa presa: dados confirmados e encaminhados (código …)\", \"Quer continuar com o assunto em aberto ou encerrar a conversa?\", \"Ainda em aberto:\" com \"Menos urgente: 1. O seu processo (guardado até dd/mm, ainda não começou)\", \"Outras opções: 2. Falar de um assunto novo, 3. Encerrar a conversa\" e \"Responda com o número da opção.\". Aparecem três botões: \"1. O seu processo\", \"2. Falar de um assunto novo\" e \"3. Encerrar a conversa\". Em assuntosEmAberto, o item traz tipoCaso andamento-processo e não traz chatIdAssunto."
         },
         {
           "relato": "meu marido me ameaçou ontem e meu irmão foi preso semana passada (Sim; leve o 1º assunto até o fim)",
           "esperado": "Se o 1º terminar em concluido: \"Ainda falta um assunto urgente: a pessoa presa. Vamos falar dele agora.\", sem resumo e sem botões, e a Tykhe segue para \"abrir o próximo\". O resumo (com os dois assuntos) e os botões vêm no fim da pessoa presa. A violência doméstica aparece como \"a situação que você contou\", sem a palavra violência."
         },
         {
-          "relato": "meu irmão foi preso e o plano negou a cirurgia da minha mãe (Sim; no plano, responda 3 vezes sem mandar a foto da carteirinha)",
-          "esperado": "Termina em handoff_humano: nada abre, sem botões, e \"a pessoa presa\" vai na nota do atendimento humano."
+          "relato": "meu irmão foi preso e o plano negou a cirurgia da minha mãe (Não, para começar pelo plano; no plano, responda 3 vezes sem mandar a foto da carteirinha)",
+          "esperado": "Termina em handoff_humano: nada abre e sem botões. O texto termina com \"Também ficou para depois: a pessoa presa.\" (13/11), e \"a pessoa presa\" vai na nota do atendimento humano."
         }
       ],
       "campos_entrega": [
@@ -747,8 +752,8 @@ window.TAREFAS = {
       ],
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
-      "atualizada_em": "2026-11-11",
-      "atualizacao": "resumo da conversa no fim e um botão por assunto em aberto, mais \"Encerrar a conversa\"",
+      "atualizada_em": "2026-11-13",
+      "atualizacao": "fim da conversa numerado, o assunto pelo flowId ou tipoCaso (sem chatIdAssunto) e o aviso no atendimento humano",
       "prazo": "2026-11-13",
       "status": "lancada",
       "entrega": {
@@ -777,7 +782,7 @@ window.TAREFAS = {
       "fase": "m0",
       "descricao": "Ligar os caminhos que saem do fim do assunto: o urgente abre pela rota do próximo assunto; o botão de um assunto em aberto abre esse assunto; \"Falar de um assunto novo\" começa outra conversa; \"Encerrar a conversa\" fecha.",
       "objetivo": "A pessoa resolve o que ainda falta sem repetir o que já contou, escolhendo um assunto em aberto, começando um assunto novo ou encerrando a conversa.",
-      "contexto": "Quem cria o chatId de cada assunto é a Maria (<chatId>-assunto-2, -3). A Tykhe só manda o chatId da conversa. Os botões do fim e o próximo urgente vão todos para POST /atendimentos/proximo-assunto: sem resposta, abre o próximo da fila; com \"resposta\" igual ao texto do botão, abre o assunto escolhido ou, com \"Encerrar a conversa\", fecha. O assunto novo é uma conversa nova no orquestrador, com chatId novo e o mesmo idUsuario. A rota POST /atendimentos/assuntos-em-aberto continua existindo para mostrar a lista em outro momento, mas os botões do fim não precisam dela.",
+      "contexto": "Quem cria o chatId de cada assunto é a Maria (<chatId>-assunto-2, -3). A Tykhe só manda o chatId da conversa. Os botões do fim e o próximo urgente vão todos para POST /atendimentos/proximo-assunto: sem resposta, abre o próximo da fila; com \"resposta\" igual ao texto do botão (ou só o número dele), abre o assunto escolhido ou, com \"Encerrar a conversa\", fecha. Mudou em 13/11 (PR #485): para abrir um assunto direto, sem a resposta da pessoa, mande em \"assunto\" o flowId ou o tipoCaso do item de assuntosEmAberto (o chatIdAssunto saiu da resposta); os botões vêm numerados; e a lista da rota dos assuntos em aberto também tem \"Encerrar a conversa\". O assunto novo é uma conversa nova no orquestrador, com chatId novo e o mesmo idUsuario. A rota POST /atendimentos/assuntos-em-aberto continua existindo para mostrar a lista em outro momento, mas os botões do fim não precisam dela.",
       "tempo": "Cerca de 3 horas",
       "issues_maria": [
         450,
@@ -790,7 +795,12 @@ window.TAREFAS = {
         {
           "nome": "POST /atendimentos/proximo-assunto",
           "onde": "Rota, só no release",
-          "como": "Corpo {\"chatId\": \"<chatId da conversa>\"} abre o próximo da fila (o urgente da T6). Com \"resposta\": \"<texto do botão>\" (ou \"assunto\": \"<chatIdAssunto>\"), abre o escolhido."
+          "como": "Corpo {\"chatId\": \"<chatId da conversa>\"} abre o próximo da fila (o urgente da T6). Com \"resposta\": \"<texto do botão>\" (por exemplo \"1. O seu processo\", ou só \"1\"), abre o escolhido. Com \"assunto\": \"<flowId ou tipoCaso do item>\" (13/11), abre aquele assunto direto."
+        },
+        {
+          "nome": "\"assunto\": flowId ou tipoCaso (13/11)",
+          "onde": "Corpo de POST /atendimentos/proximo-assunto",
+          "como": "Assunto da Maria, pelo flowId: pessoa presa 3df874f2-675a-4c43-9ec7-480f7c702f50, violência doméstica cabb2495-4e12-4f4a-9956-3d20649059bc, plano de saúde 84433c84-4776-4b05-a5a0-af8012d8eced. Assunto da Tykhe, pelo tipoCaso: saude, novo-processo, andamento-processo, agendamentos, ajuda-app, outros. Exemplo: {\"chatId\": \"<chatId da conversa>\", \"assunto\": \"andamento-processo\"}. Um id que não está em aberto para a pessoa dá 404."
         },
         {
           "nome": "chatId (na resposta)",
@@ -798,9 +808,9 @@ window.TAREFAS = {
           "como": "O chatId do assunto aberto. Use esse daí em diante, em todas as chamadas desse assunto."
         },
         {
-          "nome": "\"Encerrar a conversa\"",
-          "onde": "Último botão de opcoesDoFim",
-          "como": "POST /atendimentos/proximo-assunto com {\"chatId\": \"<chatId da conversa>\", \"resposta\": \"Encerrar a conversa\"}. A Maria devolve \"Combinado. … Quando quiser, é só voltar a falar com a gente.\", com status concluido e sem _links.responder: mostrar e encerrar. Os assuntos guardados continuam guardados."
+          "nome": "\"N. Encerrar a conversa\"",
+          "onde": "Último botão de opcoesDoFim e, desde 13/11, da lista da rota dos assuntos em aberto",
+          "como": "POST /atendimentos/proximo-assunto com {\"chatId\": \"<chatId da conversa>\", \"resposta\": \"<texto do botão, por exemplo 3. Encerrar a conversa>\"} (ou só o número). A Maria devolve \"Combinado. … Quando quiser, é só voltar a falar com a gente.\", com status concluido e sem _links.responder: mostrar e encerrar. Os assuntos guardados continuam guardados."
         },
         {
           "nome": "POST /atendimentos/assuntos-em-aberto",
@@ -836,8 +846,8 @@ window.TAREFAS = {
       "passos": [
         "Crie o nó de API POST /atendimentos/proximo-assunto no release, com o corpo {\"chatId\": \"<chatId da conversa>\"}. Ligue ao caminho \"abrir o próximo\" da T6 (urgente na vez).",
         "Guarde o chatId que vem na resposta numa variável própria e use em todas as chamadas desse assunto. Com flowId, siga pelo fluxo; com redirecionado, pelo tipoCaso; com 404, encerre.",
-        "Ligue os botões de assunto da T6 (todos menos os dois últimos) a POST /atendimentos/proximo-assunto com {\"chatId\": \"<chatId da conversa>\", \"resposta\": \"<texto do botão>\"}. Depois, igual ao passo 2.",
-        "Ligue o botão \"Encerrar a conversa\" à mesma rota, com \"resposta\": \"Encerrar a conversa\". Mostre a resposta e encerre a conversa na Tykhe.",
+        "Ligue os botões de assunto da T6 (todos menos os dois últimos) a POST /atendimentos/proximo-assunto com {\"chatId\": \"<chatId da conversa>\", \"resposta\": \"<texto do botão, com o número>\"}. Se for mais fácil na Tykhe, mande \"assunto\" com o flowId ou o tipoCaso do item de assuntosEmAberto (13/11). Depois, igual ao passo 2.",
+        "Ligue o botão \"Encerrar a conversa\" (o último, já numerado) à mesma rota, com \"resposta\" igual ao texto do botão. Mostre a resposta e encerre a conversa na Tykhe. Na lista da rota dos assuntos em aberto, o encerrar também aparece (13/11).",
         "Se a resposta for \"Pode me contar o que você precisa?\" (_links.responder para o orquestrador), ou se a pessoa tocar em \"Falar de um assunto novo\": mostre a pergunta e mande a resposta como conversa nova, POST /atendimentos/orquestrador com chatId novo, \"mensagem\" e o mesmo idUsuario.",
         "Quando o assunto aberto terminar, volte à T6 com a nova resposta final.",
         "Rode os casos abaixo e anote os chatId.",
@@ -850,8 +860,8 @@ window.TAREFAS = {
           "esperado": "Se o 1º terminar em concluido, a Tykhe chama a rota sozinha: \"Agora vamos falar da pessoa presa.\", com o chatId terminado em -assunto-2, sem perguntar de novo o parentesco."
         },
         {
-          "relato": "meu filho foi preso e eu queria saber como está o meu processo de pensão (Sim; pessoa presa até o fim; tocar no botão \"O seu processo\")",
-          "esperado": "Vem redirecionado com tipoCaso andamento-processo e o chatId -assunto-2."
+          "relato": "meu filho foi preso e eu queria saber como está o meu processo de pensão (Sim; pessoa presa até o fim; tocar no botão \"1. O seu processo\")",
+          "esperado": "Vem redirecionado com tipoCaso andamento-processo e o chatId -assunto-2. O mesmo acontece mandando \"assunto\": \"andamento-processo\"."
         },
         {
           "relato": "o mesmo caso, tocando em \"Falar de um assunto novo\" e escrevendo \"quero remarcar meu horário\"",
@@ -862,7 +872,7 @@ window.TAREFAS = {
           "esperado": "As duas respostas trazem o mesmo chatId, sem abrir outro atendimento."
         },
         {
-          "relato": "o mesmo caso, com um idUsuario de teste, tocando em \"Encerrar a conversa\"",
+          "relato": "o mesmo caso, com um idUsuario de teste, tocando em \"3. Encerrar a conversa\"",
           "esperado": "\"Combinado. Seus assuntos em aberto ficam guardados por até 30 dias. Quando quiser, é só voltar a falar com a gente.\", com status concluido. Numa conversa nova com o mesmo idUsuario, \"quero ver meus assuntos\" ainda mostra \"O seu processo\"."
         }
       ],
@@ -909,8 +919,8 @@ window.TAREFAS = {
       ],
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
-      "atualizada_em": "2026-11-11",
-      "atualizacao": "o botão de cada assunto abre direto, e entrou o \"Encerrar a conversa\"",
+      "atualizada_em": "2026-11-13",
+      "atualizacao": "abrir o assunto pelo flowId ou tipoCaso em \"assunto\", botões numerados e o encerrar também na lista",
       "prazo": "2026-11-13",
       "status": "lancada",
       "entrega": {
@@ -987,23 +997,23 @@ window.TAREFAS = {
         },
         {
           "relato": "2. meu filho foi preso e eu queria saber como está o meu processo de pensão",
-          "esperado": "A pessoa presa até o fim; o resumo da conversa, \"Ainda em aberto: • O seu processo · menos urgente · em aberto até dd/mm · ainda não começou\" e os botões \"O seu processo\", \"Falar de um assunto novo\" e \"Encerrar a conversa\"."
+          "esperado": "A pessoa presa até o fim; o resumo da conversa, \"Ainda em aberto:\" com \"Menos urgente: 1. O seu processo (guardado até dd/mm, ainda não começou)\", \"Outras opções:\", \"Responda com o número da opção.\" e os botões \"1. O seu processo\", \"2. Falar de um assunto novo\" e \"3. Encerrar a conversa\" (13/11)."
         },
         {
-          "relato": "3. No fim do caso 2, tocar em \"O seu processo\" (e, numa repetição do caso 2, em \"Encerrar a conversa\")",
-          "esperado": "\"O seu processo\": vem redirecionado com tipoCaso andamento-processo. \"Encerrar a conversa\": \"Combinado. Seus assuntos em aberto ficam guardados por até 30 dias…\"."
+          "relato": "3. No fim do caso 2, tocar em \"1. O seu processo\" (e, numa repetição do caso 2, em \"3. Encerrar a conversa\")",
+          "esperado": "\"1. O seu processo\": vem redirecionado com tipoCaso andamento-processo. \"3. Encerrar a conversa\": \"Combinado. Seus assuntos em aberto ficam guardados por até 30 dias…\"."
         },
         {
           "relato": "4. Conversa nova com o mesmo idUsuario, depois de refazer o caso 2: \"queria saber como está o meu processo\"",
           "esperado": "Sem pergunta: a Maria retoma o assunto guardado e redireciona para andamento-processo."
         },
         {
-          "relato": "5. meu irmão foi preso e o plano negou a cirurgia da minha mãe (no plano, 3 respostas sem a foto)",
-          "esperado": "Termina em handoff_humano; nada abre, sem botões, e \"a pessoa presa\" vai para o atendimento humano."
+          "relato": "5. meu irmão foi preso e o plano negou a cirurgia da minha mãe (Não, para começar pelo plano; no plano, 3 respostas sem a foto)",
+          "esperado": "Termina em handoff_humano; nada abre e sem botões. O texto termina com \"Também ficou para depois: a pessoa presa.\" (13/11), e \"a pessoa presa\" vai para o atendimento humano."
         },
         {
           "relato": "6. o plano negou a minha cirurgia (com um idUsuario sem nada guardado)",
-          "esperado": "Sem \"Pode ser assim?\" e sem próximo assunto. Se terminar em concluido, o resumo com um assunto e \"Quer falar de um assunto novo ou encerrar a conversa?\", com esses dois botões. Se terminar em handoff_humano, como hoje."
+          "esperado": "Sem \"Pode ser assim?\" e sem próximo assunto. Se terminar em concluido, o resumo com um assunto e \"Quer falar de um assunto novo ou encerrar a conversa?\", com os botões \"1. Falar de um assunto novo\" e \"2. Encerrar a conversa\". Se terminar em handoff_humano, como hoje."
         }
       ],
       "campos_entrega": [
@@ -1052,8 +1062,8 @@ window.TAREFAS = {
       ],
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
-      "atualizada_em": "2026-11-11",
-      "atualizacao": "os casos 2, 3 e 6 esperam o fim novo da conversa",
+      "atualizada_em": "2026-11-13",
+      "atualizacao": "os casos 2, 3, 5 e 6 esperam os botões numerados, a ordem nova e o aviso no atendimento humano",
       "prazo": "2026-11-13",
       "status": "lancada",
       "entrega": {
