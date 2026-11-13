@@ -2,6 +2,13 @@ window.NOVIDADES = {
   "explicacao": "A cada atualização do guia, acrescente uma entrada no topo da lista: id único (data e um nome curto), em (AAAA-MM-DD), titulo, texto e link (https:// ou rota interna, como #/tarefas). A página mostra à Marcelle as entradas que ela ainda não viu, e a publicação manda o aviso por email (menção no GitHub). Nunca coloque dado pessoal de assistido nem chave: este arquivo é público.",
   "lista": [
     {
+      "id": "2026-11-13-assunto-pelo-flowid",
+      "em": "2026-11-13",
+      "titulo": "T4 a T8 atualizadas: o assunto pelo flowId, a ordem nova e as listas numeradas",
+      "texto": "Decisões da Nicole de 13/11 (PR #485 da Maria). Valem no release quando o PR chegar lá; a Nicole avisa. 1) Em assuntosEmAberto, o id do assunto é o flowId (assunto da Maria) ou o tipoCaso (assunto da Tykhe); o chatIdAssunto saiu. Para abrir um assunto direto, mande esse valor em \"assunto\" na rota do próximo assunto (os ids estão na T6 e na T7). 2) A ordem dos assuntos agora é violência doméstica, pessoa presa e saúde. 3) Todas as listas de escolha vêm numeradas, com \"Responda com o número da opção.\", e os botões levam o número (\"1. O seu processo\"). \"Qual você quer resolver primeiro?\" passa a vir com botões. 4) A lista dos assuntos em aberto ganhou \"Encerrar a conversa\". 5) No atendimento humano, o texto avisa \"Também ficou para depois: …\". Se você já tinha marcado passos da T4 a T8, confira de novo.",
+      "link": "#/tarefas"
+    },
+    {
       "id": "2026-11-12-tarefa-atualizada",
       "em": "2026-11-12",
       "titulo": "Os cartões mostram quando a tarefa foi atualizada",
