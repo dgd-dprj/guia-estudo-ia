@@ -73,10 +73,11 @@ As tarefas ficam em `dados/tarefas.js`, em JSON, dentro de `window.TAREFAS = { .
   | `fase` | O módulo ligado (`m0` a `m10`) |
   | `issues_maria` | Números das issues da Maria, se houver |
   | `lancada_por`, `lancada_em`, `prazo` | Quem lançou, quando e até quando (datas `AAAA-MM-DD`) |
-  | `status` | `lancada`, `em_andamento`, `entregue`, `refazer` ou `avaliada` |
+  | `status` | `lancada`, `em_andamento`, `entregue`, `refazer`, `avaliada` ou `transferida` (com `transferida_para`: quem termina a tarefa; sai da lista da jogadora, sem contar como entrega nem atraso) |
   | `entrega` | `em` (data), `link` (PR ou issue, `https://`) e `observacao` |
   | `avaliacao` | `por` (quem avaliou), `em`, uma nota de 1 a 5 para cada critério e `comentario` |
   | Opcionais, para detalhar | `objetivo`, `tempo`, `passos` (lista), `issues_detalhe` (por issue: `numero`, `titulo`, `resumo`, `olhar` e `perguntas`), `entregavel`, `pronto_quando` (lista) e `cuidados` (lista) |
+  | Opcional, para o estudo | `estudar` (lista, por item: `titulo`, `link` com `https://` ou rota interna como `#/modulo/m5/2`, e `porque`). Aparece no cartão como "📚 O que estudar para esta tarefa" |
   | Opcionais, para prioridade e ordem | `urgente` (`true`), `prioridade` (`maxima`, `alta` ou `normal`), `depende_de` (ids das tarefas que vêm antes) e `identificadores` (por item: `nome`, `onde` e `como`, os nomes exatos de campos e rotas) |
 
   Com `issues_detalhe`, o "📬 Avisar entrega" abre a issue já com um bloco por issue para a Marcelle preencher.

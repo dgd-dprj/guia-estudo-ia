@@ -21,7 +21,7 @@ ARQUIVO_TAREFAS = DADOS / "tarefas.js"
 CAMPOS_MODULO = ["id", "semana", "titulo", "objetivo", "ponte", "tempo", "estudar", "checar", "praticar", "tarefa", "pronto"]
 CAMPOS_TAREFA = ["titulo", "issues", "descricao", "onde", "como_testar", "cuidado"]
 CAMPOS_TAREFA_LANCADA = ["id", "titulo", "fase", "descricao", "lancada_por", "lancada_em", "prazo", "status", "entrega", "avaliacao"]
-STATUS = {"lancada", "em_andamento", "entregue", "refazer", "avaliada"}
+STATUS = {"lancada", "em_andamento", "entregue", "refazer", "avaliada", "transferida"}
 PRIORIDADES = {"maxima", "alta", "normal"}
 DATA = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -60,6 +60,11 @@ def verificar_tarefas(t: dict, ids_modulo: set[str]) -> list[str]:
             problemas.append(f"{nome}: a fase '{x['fase']}' não existe no guia")
         if x.get("status") not in STATUS:
             problemas.append(f"{nome}: status precisa ser um de {sorted(STATUS)}")
+        if x.get("status") == "transferida" and not (isinstance(x.get("transferida_para"), str) and x["transferida_para"].strip()):
+            problemas.append(f"{nome}: status 'transferida' precisa de 'transferida_para' (quem termina a tarefa)")
+        for e in x.get("estudar", []):
+            if not (isinstance(e.get("titulo"), str) and e["titulo"].strip()) or (e.get("link") and not link_valido(e["link"])):
+                problemas.append(f"{nome}: cada item de 'estudar' precisa de 'titulo' e, se tiver 'link', https:// ou #/")
         if not data_ok(x.get("lancada_em")):
             problemas.append(f"{nome}: 'lancada_em' precisa ser AAAA-MM-DD")
         if not data_ok(x.get("atualizada_em"), opcional=True):

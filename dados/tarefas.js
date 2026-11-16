@@ -1,5 +1,5 @@
 window.TAREFAS = {
-  "explicacao": "Para lançar uma tarefa, copie um item da lista, troque o id (T2, T3...) e preencha os campos. Datas no formato AAAA-MM-DD. Status: lancada, em_andamento, entregue, refazer ou avaliada. Os campos urgente, prioridade (maxima, alta ou normal), prazo_hora (HH:MM), objetivo, contexto, tempo, depende_de (ids de outras tarefas), identificadores (nome, onde e como), passos, issues_detalhe, casos_teste, campos_entrega, entregavel, pronto_quando e cuidados são opcionais: use para detalhar o que precisa ser feito. Na avaliação, cada critério vai de 1 a 5; deixe null o que ainda não foi avaliado. Nunca coloque dado pessoal de assistido nem chave: este arquivo é público.",
+  "explicacao": "Para lançar uma tarefa, copie um item da lista, troque o id (T2, T3...) e preencha os campos. Datas no formato AAAA-MM-DD. Status: lancada, em_andamento, entregue, refazer, avaliada ou transferida (com transferida_para: quem termina a tarefa). Os campos urgente, prioridade (maxima, alta ou normal), prazo_hora (HH:MM), objetivo, contexto, tempo, depende_de (ids de outras tarefas), identificadores (nome, onde e como), passos, issues_detalhe, casos_teste, campos_entrega, entregavel, pronto_quando, cuidados e estudar (titulo, link e porque: o que estudar antes) são opcionais: use para detalhar o que precisa ser feito. Na avaliação, cada critério vai de 1 a 5; deixe null o que ainda não foi avaliado. Nunca coloque dado pessoal de assistido nem chave: este arquivo é público.",
   "criterios": {
     "qualidade": "Qualidade da entrega",
     "testes": "Testes",
@@ -222,7 +222,7 @@ window.TAREFAS = {
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
       "prazo": "2026-11-13",
-      "status": "lancada",
+      "status": "transferida",
       "entrega": {
         "em": null,
         "link": null,
@@ -239,7 +239,10 @@ window.TAREFAS = {
           "autonomia": null
         },
         "comentario": ""
-      }
+      },
+      "transferida_para": "Ícaro",
+      "atualizada_em": "2026-11-16",
+      "atualizacao": "Passou para o Ícaro (decisão da Nicole de 16/11), para acelerar a Tykhe. Você não precisa terminar nem enviar nada; o que você já fez e enviou fica como registro. Suas tarefas agora são a T9, a T10 e a T11."
     },
     {
       "id": "T3",
@@ -333,10 +336,10 @@ window.TAREFAS = {
       ],
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
-      "atualizada_em": "2026-11-11",
-      "atualizacao": "sem a pergunta do CPF no começo; a Maria reconhece a pessoa pelo idUsuario",
+      "atualizada_em": "2026-11-16",
+      "atualizacao": "Passou para o Ícaro (decisão da Nicole de 16/11), para acelerar a Tykhe. Você não precisa terminar nem enviar nada; o que você já fez e enviou fica como registro. Suas tarefas agora são a T9, a T10 e a T11.",
       "prazo": "2026-11-13",
-      "status": "lancada",
+      "status": "transferida",
       "entrega": {
         "em": null,
         "link": null,
@@ -353,7 +356,8 @@ window.TAREFAS = {
           "autonomia": null
         },
         "comentario": ""
-      }
+      },
+      "transferida_para": "Ícaro"
     },
     {
       "id": "T4",
@@ -468,10 +472,10 @@ window.TAREFAS = {
       ],
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
-      "atualizada_em": "2026-11-13",
-      "atualizacao": "ordem nova (violência, pessoa presa, saúde) e \"Qual você quer resolver primeiro?\" com botões numerados",
+      "atualizada_em": "2026-11-16",
+      "atualizacao": "Passou para o Ícaro (decisão da Nicole de 16/11), para acelerar a Tykhe. Você não precisa terminar nem enviar nada; o que você já fez e enviou fica como registro. Suas tarefas agora são a T9, a T10 e a T11.",
       "prazo": "2026-11-13",
-      "status": "lancada",
+      "status": "transferida",
       "entrega": {
         "em": null,
         "link": null,
@@ -488,7 +492,8 @@ window.TAREFAS = {
           "autonomia": null
         },
         "comentario": ""
-      }
+      },
+      "transferida_para": "Ícaro"
     },
     {
       "id": "T5",
@@ -616,10 +621,10 @@ window.TAREFAS = {
       ],
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
-      "atualizada_em": "2026-11-13",
-      "atualizacao": "a lista dos assuntos em aberto vem numerada, com os botões do mesmo número",
+      "atualizada_em": "2026-11-16",
+      "atualizacao": "Passou para o Ícaro (decisão da Nicole de 16/11), para acelerar a Tykhe. Você não precisa terminar nem enviar nada; o que você já fez e enviou fica como registro. Suas tarefas agora são a T9, a T10 e a T11.",
       "prazo": "2026-11-13",
-      "status": "lancada",
+      "status": "transferida",
       "entrega": {
         "em": null,
         "link": null,
@@ -636,7 +641,8 @@ window.TAREFAS = {
           "autonomia": null
         },
         "comentario": ""
-      }
+      },
+      "transferida_para": "Ícaro"
     },
     {
       "id": "T6",
@@ -752,10 +758,10 @@ window.TAREFAS = {
       ],
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
-      "atualizada_em": "2026-11-13",
-      "atualizacao": "fim da conversa numerado, o assunto pelo flowId ou tipoCaso (sem chatIdAssunto) e o aviso no atendimento humano",
+      "atualizada_em": "2026-11-16",
+      "atualizacao": "Passou para o Ícaro (decisão da Nicole de 16/11), para acelerar a Tykhe. Você não precisa terminar nem enviar nada; o que você já fez e enviou fica como registro. Suas tarefas agora são a T9, a T10 e a T11.",
       "prazo": "2026-11-13",
-      "status": "lancada",
+      "status": "transferida",
       "entrega": {
         "em": null,
         "link": null,
@@ -772,7 +778,8 @@ window.TAREFAS = {
           "autonomia": null
         },
         "comentario": ""
-      }
+      },
+      "transferida_para": "Ícaro"
     },
     {
       "id": "T7",
@@ -919,10 +926,10 @@ window.TAREFAS = {
       ],
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
-      "atualizada_em": "2026-11-13",
-      "atualizacao": "abrir o assunto pelos campos \"flowId\" ou \"tipoCaso\" no corpo, botões numerados e o encerrar também na lista",
+      "atualizada_em": "2026-11-16",
+      "atualizacao": "Passou para o Ícaro (decisão da Nicole de 16/11), para acelerar a Tykhe. Você não precisa terminar nem enviar nada; o que você já fez e enviou fica como registro. Suas tarefas agora são a T9, a T10 e a T11.",
       "prazo": "2026-11-13",
-      "status": "lancada",
+      "status": "transferida",
       "entrega": {
         "em": null,
         "link": null,
@@ -939,7 +946,8 @@ window.TAREFAS = {
           "autonomia": null
         },
         "comentario": ""
-      }
+      },
+      "transferida_para": "Ícaro"
     },
     {
       "id": "T8",
@@ -1062,9 +1070,424 @@ window.TAREFAS = {
       ],
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-11",
-      "atualizada_em": "2026-11-13",
-      "atualizacao": "os casos 2, 3, 5 e 6 esperam os botões numerados, a ordem nova e o aviso no atendimento humano",
+      "atualizada_em": "2026-11-16",
+      "atualizacao": "Passou para o Ícaro (decisão da Nicole de 16/11), para acelerar a Tykhe. Você não precisa terminar nem enviar nada; o que você já fez e enviou fica como registro. Suas tarefas agora são a T9, a T10 e a T11.",
       "prazo": "2026-11-13",
+      "status": "transferida",
+      "entrega": {
+        "em": null,
+        "link": null,
+        "observacao": ""
+      },
+      "avaliacao": {
+        "por": [],
+        "em": null,
+        "criterios": {
+          "qualidade": null,
+          "testes": null,
+          "prazo": null,
+          "comunicacao": null,
+          "autonomia": null
+        },
+        "comentario": ""
+      },
+      "transferida_para": "Ícaro"
+    },
+    {
+      "id": "T9",
+      "titulo": "Banco de respostas inventadas para a pergunta do RG e do CPF",
+      "urgente": true,
+      "prioridade": "maxima",
+      "fase": "m5",
+      "descricao": "Escrever cerca de 100 respostas inventadas, do jeito que as pessoas escrevem no WhatsApp, para a pergunta do RG da pessoa presa e para a pergunta do CPF. Separar as respostas por tipo e dizer, para cada uma, o que a Maria deveria fazer e responder.",
+      "objetivo": "Criar a base de testes da próxima correção do RG, o problema que mais leva conversa da pessoa presa para o atendimento humano hoje. Cada frase da sua planilha vira um teste automático na Maria, e a coluna \"o que a Maria deveria fazer\" vira a regra que a correção vai seguir.",
+      "contexto": "Quando alguém quer saber de uma pessoa presa, a Maria pergunta: \"Qual o RG da pessoa presa? Pode escrever só os números ou com pontos e traço. Exemplo: 123456789 ou 12.345.678-9.\" Com a resposta, ela consulta o Verde, o sistema da Defensoria. Se o Verde não acha ninguém, ela diz \"Não encontrei ninguém com esse RG (tentativa 1 de 3)\". Se a resposta tem letra, ela diz \"Não consegui ler esse RG (tentativa 1 de 3)\" e, na 3ª vez, passa a conversa para uma pessoa da equipe. O que a produção mostrou de 13 a 16/11 (só contagens, sem dado pessoal): 17 conversas terminaram em \"RG não encontrado\". Dessas, 7 tinham 11 dígitos, o tamanho do CPF, e 3 tinham 20 dígitos, o tamanho do número do processo. Das 26 vezes em que a Maria recusou o RG pelo formato, 20 foram só palavras, sem número nenhum (provavelmente \"não sei\" ou \"não tenho\"). A #497 resolveu o CPF no lugar do RG: a Maria confere a conta dos dígitos do CPF, sem IA, e pede o RG de novo sem consultar o Verde. Falta decidir o que fazer com o resto: quem não sabe o RG, quem não tem, quem manda o número do processo, quem faz uma pergunta de volta e quem manda outro documento. É isso que a sua planilha vai mostrar. Por que inventar as frases: as conversas reais têm dado pessoal (LGPD), e o log da Maria guarda só a quantidade de dígitos, nunca o texto. Por isso, a base de teste é feita com frases inventadas, parecidas com as reais. Onde está a IA nisto: montar o conjunto de casos com a resposta certa de cada um (o rótulo) é a parte mais importante de avaliar IA. Sem ele, ninguém consegue medir se uma mudança melhorou ou piorou. E a Maria sempre tenta primeiro uma regra exata, que não custa nada (como a conta do CPF), e só usa IA quando a regra não resolve. Sua coluna \"dá para resolver sem IA?\" mostra onde está cada caso.",
+      "tempo": "Cerca de 2 dias: meio dia de estudo e um dia e meio para a planilha. Comece por esta.",
+      "issues_maria": [
+        497,
+        394,
+        343
+      ],
+      "depende_de": [],
+      "estudar": [
+        {
+          "titulo": "Guia: baú da fase \"Avaliar IA: dados, métricas e variação\"",
+          "link": "#/modulo/m5/2",
+          "porque": "o que é um conjunto de avaliação, o rótulo de cada caso e os casos de fronteira. É exatamente o que você vai montar."
+        },
+        {
+          "titulo": "Claude: definir critérios de sucesso",
+          "link": "https://docs.anthropic.com/en/docs/test-and-evaluate/define-success",
+          "porque": "como dizer, antes de testar, o que é acertar. A sua coluna \"o que a Maria deveria fazer\" é esse critério."
+        },
+        {
+          "titulo": "Claude: criar avaliações",
+          "link": "https://docs.anthropic.com/en/docs/test-and-evaluate/develop-tests",
+          "porque": "leia a parte de casos de teste: variedade, casos difíceis e a resposta esperada de cada um."
+        },
+        {
+          "titulo": "Exemplo na Maria: o banco de frases do parentesco",
+          "link": "https://github.com/dgd-dprj/maria-langgraph-pp/blob/develop/tests/shared/test_parentesco.py",
+          "porque": "veja a lista FRASES_POR_PARENTESCO. É o formato em que a sua planilha vai virar teste."
+        },
+        {
+          "titulo": "Código: a pergunta do RG",
+          "link": "https://github.com/dgd-dprj/maria-langgraph-pp/blob/develop/src/maria/fluxos/pessoa_presa/graph.py",
+          "porque": "procure TEXTO_RG, rg_formato_valido e texto_rg_invalido: o que a Maria aceita hoje e o que ela responde."
+        },
+        {
+          "titulo": "PR #498: a conferência do CPF, sem IA",
+          "link": "https://github.com/dgd-dprj/maria-langgraph-pp/pull/498",
+          "porque": "leia a tabela \"O que muda\". É um exemplo de regra exata resolvendo um caso antes de chamar o Verde ou a IA."
+        },
+        {
+          "titulo": "Guia: baú da fase \"Segurança de IA e LGPD\"",
+          "link": "#/modulo/m8/2",
+          "porque": "por que a base é inventada e o que nunca pode entrar nela."
+        }
+      ],
+      "identificadores": [
+        {
+          "nome": "TEXTO_RG",
+          "onde": "src/maria/fluxos/pessoa_presa/graph.py",
+          "como": "A pergunta do RG que a pessoa vê. As suas respostas inventadas respondem a ela."
+        },
+        {
+          "nome": "Não consegui ler esse RG (tentativa N de 3)",
+          "onde": "A recusa pelo formato (#394)",
+          "como": "Sai quando a resposta tem letra ou símbolo. Na 3ª vez, a conversa vai para a equipe."
+        },
+        {
+          "nome": "Esse número parece um CPF",
+          "onde": "A recusa do CPF no lugar do RG (#497)",
+          "como": "Já resolvido. Coloque só 3 ou 4 frases desse tipo, como controle."
+        },
+        {
+          "nome": "rg_nao_encontrado e rg_formato_invalido",
+          "onde": "O motivo do atendimento humano que a Tykhe recebe",
+          "como": "O primeiro é o RG que o Verde não achou nas 3 consultas; o segundo, as 3 recusas pelo formato."
+        },
+        {
+          "nome": "rg_recusado_formato e rg_parece_cpf",
+          "onde": "Os eventos do log da Maria",
+          "como": "Contam as recusas sem guardar o que a pessoa escreveu. Foi deles que saíram os números do \"Para entender\"."
+        }
+      ],
+      "passos": [
+        "Estude os itens de \"📚 O que estudar\", na ordem. Anote no diário o que é um rótulo e um caso de fronteira, com as suas palavras.",
+        "Leia a #497 e o PR #498 para ver o que já está resolvido (o CPF no lugar do RG).",
+        "Crie uma planilha só sua (Google Planilhas ou Excel) com as colunas: id, pergunta (RG ou CPF), resposta inventada, tipo, o que a Maria deveria fazer, resposta sugerida da Maria, dá para resolver sem IA? (sim, não ou talvez) e observação.",
+        "Escreva cerca de 100 respostas inventadas, cobrindo estes tipos: não sei (cerca de 15); não tenho, perdi ou não lembro (10); número do processo no lugar do RG (10); pergunta de volta, como \"onde acho o rg?\" ou \"é o rg dele ou o meu?\" (15); outro documento ou dado, como CPF, certidão, nome completo ou data de nascimento (15); RG com erro, espaço, letra ou X no final (15); resposta misturada, como \"o rg é 123456789 mas não tenho certeza\" (10); e RG certo em formatos variados, como controle (10).",
+        "Escreva como se escreve no WhatsApp: abreviação (n, vc, tb), sem acento, tudo em minúsculas, erro de digitação, número por extenso como em áudio transcrito (\"um dois tres...\") e emoji.",
+        "Para cada linha, escolha o que a Maria deveria fazer: (a) aceitar e consultar o Verde; (b) pedir de novo, explicando o que falta; (c) usar como número do processo; (d) passar para uma pessoa da equipe; ou (e) responder à pergunta e pedir o RG de novo. Escreva também a resposta que a Maria daria, em linguagem simples.",
+        "Marque se dá para resolver sem IA (uma regra exata, como contar dígitos ou procurar \"nao sei\") ou se precisa de IA (entender a intenção da frase).",
+        "No topo da planilha, faça um resumo: quantas frases de cada tipo, quantas resolvem sem IA e as 3 coisas que mais surpreenderam você.",
+        "Compartilhe a planilha só com a Nicole (nada de link público), preencha a \"Entrega\" e clique em \"📬 Enviar entrega\"."
+      ],
+      "casos_teste": [
+        {
+          "relato": "n sei o rg dele",
+          "esperado": "Exemplo de linha. Tipo: não sei. O que fazer: (d) passar para a equipe, sem gastar as 3 recusas (ou outra opção, se você achar melhor e explicar). Resolve sem IA? Talvez (procurar \"sei\" e \"nao\")."
+        },
+        {
+          "relato": "0001234-56.2025.8.19.0001",
+          "esperado": "Exemplo de linha (número inventado). Tipo: número do processo. O que fazer: (c) usar como número do processo. Resolve sem IA? Sim (20 dígitos)."
+        },
+        {
+          "relato": "onde fica o rg na identidade?",
+          "esperado": "Exemplo de linha. Tipo: pergunta de volta. O que fazer: (e) explicar onde fica o número e pedir de novo. Resolve sem IA? Não."
+        },
+        {
+          "relato": "12.345.678-X",
+          "esperado": "Exemplo de linha (número inventado). Tipo: RG com X no final, que existe em alguns estados. Hoje a Maria recusa por causa da letra. O que fazer? Anote em \"observação\" o que você acha."
+        },
+        {
+          "relato": "123.456.789-09",
+          "esperado": "Exemplo de linha (o CPF de teste). Tipo: outro documento (CPF). Já resolvido pela #497: \"Esse número parece um CPF…\". Linha de controle."
+        }
+      ],
+      "campos_entrega": [
+        {
+          "id": "planilha",
+          "rotulo": "Link da planilha (compartilhada só com a Nicole, nunca público)"
+        },
+        {
+          "id": "contagem",
+          "rotulo": "Quantas frases de cada tipo, e quantas resolvem sem IA"
+        },
+        {
+          "id": "surpresas",
+          "rotulo": "O que surpreendeu você: casos que a Maria trata mal hoje"
+        },
+        {
+          "id": "duvidas",
+          "rotulo": "Dúvidas e o que ficou faltando"
+        }
+      ],
+      "entregavel": "A planilha com cerca de 100 respostas inventadas, cada uma com tipo, o que a Maria deveria fazer, a resposta sugerida e se resolve sem IA, mais o resumo no topo.",
+      "pronto_quando": [
+        "A planilha tem pelo menos 100 respostas inventadas.",
+        "Cada tipo da lista tem pelo menos 8 respostas.",
+        "Toda linha tem o tipo, o que a Maria deveria fazer, a resposta sugerida e a coluna \"resolve sem IA?\".",
+        "O resumo no topo conta as frases por tipo e as que resolvem sem IA.",
+        "Nenhuma frase foi copiada de conversa real, e nenhum número é de uma pessoa de verdade."
+      ],
+      "cuidados": [
+        "Só frases inventadas. Nunca copie nada de conversa real do WhatsApp, da Tykhe ou do Verde, nem de print que alguém mandou.",
+        "Números inventados: RG como 123456789 e o CPF de teste 123.456.789-09. Nunca o RG ou o CPF de alguém que você conhece, nem o seu.",
+        "Não teste as frases no release: ele consulta o Verde de homologação, que tem dados de pessoas reais.",
+        "A planilha não vai para o GitHub: o repositório do guia é público. Compartilhe só com a Nicole.",
+        "Travou mais de 30 minutos? Avise a Nicole e siga para o próximo passo."
+      ],
+      "lancada_por": "Nicole",
+      "lancada_em": "2026-11-16",
+      "prazo": "2026-11-19",
+      "status": "lancada",
+      "entrega": {
+        "em": null,
+        "link": null,
+        "observacao": ""
+      },
+      "avaliacao": {
+        "por": [],
+        "em": null,
+        "criterios": {
+          "qualidade": null,
+          "testes": null,
+          "prazo": null,
+          "comunicacao": null,
+          "autonomia": null
+        },
+        "comentario": ""
+      }
+    },
+    {
+      "id": "T10",
+      "titulo": "Documentos da base do RAG e as perguntas de avaliação",
+      "prioridade": "alta",
+      "fase": "m6",
+      "descricao": "Juntar e organizar os documentos que você usou no Guia Maria e escrever as perguntas de avaliação, com a resposta esperada de cada uma e o trecho do documento de onde ela sai.",
+      "objetivo": "Destravar o RAG da Maria. Sem a base real dos documentos, ele não pode ser testado nem ir para a produção. Você entrega o material e explica a ideia original; a Nicole conduz o desenho e as decisões.",
+      "contexto": "RAG quer dizer recuperar e gerar: a Maria busca nos documentos os trechos mais parecidos com a pergunta da pessoa e manda esses trechos para a IA responder com base neles, em vez de responder de memória. O protótipo está na Maria em src/rag (PR #490), a partir do que você começou no Guia Maria, e o plano está na #418. Em 03/11, a ligação com o multi-fluxo foi testada só com uma base de teste (61 trechos de documentos internos), e as respostas saíram com jargão técnico. Faltam três coisas, e as três são suas: os documentos de verdade (quais, de onde, de quando), organizados; um conjunto de perguntas com a resposta certa, para medir; e a ideia original do Guia Maria, por escrito. As perguntas de avaliação funcionam como a planilha da T9: cada pergunta tem a resposta certa (o rótulo), e assim dá para medir se a busca achou o trecho certo e se a IA respondeu sem inventar. Desde 05/11, quem conduz o RAG é a Nicole. As decisões de desenho (tamanho dos trechos, modelo, onde roda, o que entra na base) são dela.",
+      "tempo": "Cerca de 3 dias, depois da T9.",
+      "issues_maria": [
+        418
+      ],
+      "depende_de": [
+        "T9"
+      ],
+      "estudar": [
+        {
+          "titulo": "Guia: baú da fase \"RAG em produção\"",
+          "link": "#/modulo/m6/2",
+          "porque": "embeddings, busca por similaridade e fusão de rankings: como a Maria acha o trecho certo."
+        },
+        {
+          "titulo": "Embeddings do Titan no Bedrock",
+          "link": "https://docs.aws.amazon.com/bedrock/latest/userguide/titan-embedding-models.html",
+          "porque": "o modelo que transforma cada trecho em números para comparar com a pergunta."
+        },
+        {
+          "titulo": "pgvector",
+          "link": "https://github.com/pgvector/pgvector",
+          "porque": "o banco onde os trechos e os números ficam guardados."
+        },
+        {
+          "titulo": "Guia: baú da fase \"Avaliar IA: dados, métricas e variação\"",
+          "link": "#/modulo/m5/2",
+          "porque": "as perguntas de avaliação são um conjunto de teste, como o da T9."
+        },
+        {
+          "titulo": "Claude: criar avaliações",
+          "link": "https://docs.anthropic.com/en/docs/test-and-evaluate/develop-tests",
+          "porque": "como escrever a resposta esperada de um jeito que dê para conferir."
+        },
+        {
+          "titulo": "Código: src/rag/README.md",
+          "link": "https://github.com/dgd-dprj/maria-langgraph-pp/blob/develop/src/rag/README.md",
+          "porque": "como o protótipo está montado hoje, a partir do seu Guia Maria."
+        },
+        {
+          "titulo": "Código: src/rag/src/rag/ingest_documentos.py",
+          "link": "https://github.com/dgd-dprj/maria-langgraph-pp/blob/develop/src/rag/src/rag/ingest_documentos.py",
+          "porque": "como um documento entra na base, e por isso o formato que os arquivos precisam ter."
+        },
+        {
+          "titulo": "Issue #418: plano de implantação do RAG",
+          "link": "https://github.com/dgd-dprj/maria-langgraph-pp/issues/418",
+          "porque": "o que já foi decidido e o que falta."
+        }
+      ],
+      "passos": [
+        "Estude os itens de \"📚 O que estudar\", na ordem.",
+        "Faça uma planilha \"documentos\" com cada documento que você usou ou pretendia usar no Guia Maria: título, de onde veio (link ou setor), data da versão, se é público ou interno, o assunto e se tem dado pessoal.",
+        "Separe o que pode entrar: só documento oficial e atual da Defensoria ou de órgão público, sem dado pessoal. Marque com \"dúvida\" o que você não tiver certeza, para a Nicole decidir.",
+        "Organize os arquivos numa pasta compartilhada só com a equipe: um arquivo por documento, com o nome assunto-orgao-AAAA-MM.",
+        "Escreva cerca de 40 perguntas de avaliação, como uma pessoa assistida perguntaria pelo WhatsApp, cobrindo os assuntos dos documentos. Para cada uma: a resposta esperada (curta e em linguagem simples), o documento e o trecho de onde ela sai.",
+        "Escreva também cerca de 8 perguntas que a base NÃO responde, com a resposta esperada \"não sei, vou passar para a equipe\". Elas servem para ver se a IA inventa.",
+        "Escreva um parágrafo com a ideia original do Guia Maria: para quem era, que perguntas devia responder e o que ficou de fora.",
+        "Preencha a \"Entrega\" e clique em \"📬 Enviar entrega\"."
+      ],
+      "casos_teste": [
+        {
+          "relato": "qual documento eu levo no atendimento?",
+          "esperado": "Exemplo de pergunta. A resposta esperada sai de um documento da base; cite o arquivo e o trecho. Se nenhum documento disser, a resposta esperada é \"não sei, vou passar para a equipe\"."
+        },
+        {
+          "relato": "a defensoria abre domingo?",
+          "esperado": "Exemplo de pergunta que talvez a base não responda. Se não responder, entra nas 8 perguntas sem resposta, com \"não sei, vou passar para a equipe\"."
+        }
+      ],
+      "campos_entrega": [
+        {
+          "id": "pasta",
+          "rotulo": "Link da pasta dos documentos (só a equipe)"
+        },
+        {
+          "id": "perguntas",
+          "rotulo": "Link da planilha das perguntas e quantas perguntas são (com e sem resposta na base)"
+        },
+        {
+          "id": "ideia",
+          "rotulo": "A ideia original do Guia Maria, em um parágrafo"
+        },
+        {
+          "id": "duvidas",
+          "rotulo": "Documentos marcados com dúvida e outras perguntas para a Nicole"
+        }
+      ],
+      "entregavel": "A pasta dos documentos organizada, a planilha \"documentos\", cerca de 40 perguntas com a resposta esperada e o trecho de origem, cerca de 8 perguntas sem resposta na base e o parágrafo da ideia original.",
+      "pronto_quando": [
+        "Cada documento tem a origem, a data da versão e a marca de público ou interno.",
+        "Nenhum documento da pasta tem dado pessoal.",
+        "Há cerca de 40 perguntas com a resposta esperada, o documento e o trecho de origem.",
+        "Há cerca de 8 perguntas que a base não responde.",
+        "O parágrafo da ideia original está na entrega."
+      ],
+      "cuidados": [
+        "Nenhum documento com dado pessoal: processo, ata, print de conversa, planilha de atendimento.",
+        "Só material oficial e atual. Na dúvida, marque \"dúvida\" e deixe a Nicole decidir.",
+        "A pasta e a planilha são só da equipe, nunca com link público e nunca no GitHub.",
+        "Não mexa em src/rag nem abra PR: o desenho do RAG é da Nicole.",
+        "As perguntas são inventadas, nunca copiadas de uma conversa real."
+      ],
+      "lancada_por": "Nicole",
+      "lancada_em": "2026-11-16",
+      "prazo": "2026-11-25",
+      "status": "lancada",
+      "entrega": {
+        "em": null,
+        "link": null,
+        "observacao": ""
+      },
+      "avaliacao": {
+        "por": [],
+        "em": null,
+        "criterios": {
+          "qualidade": null,
+          "testes": null,
+          "prazo": null,
+          "comunicacao": null,
+          "autonomia": null
+        },
+        "comentario": ""
+      }
+    },
+    {
+      "id": "T11",
+      "titulo": "As mensagens da Maria em linguagem simples",
+      "prioridade": "normal",
+      "fase": "m3",
+      "descricao": "Listar todos os textos fixos que a pessoa vê na conversa com a Maria (perguntas, recusas e mensagens finais) e propor uma versão mais simples de cada um, com o motivo.",
+      "objetivo": "Deixar a Maria fácil de entender para qualquer pessoa, inclusive quem lê pouco, está nervosa ou lê no celular. Você propõe; a Nicole decide; o Claude passa para o código.",
+      "contexto": "A Maria fala com pessoas em situação difícil: um parente preso, violência doméstica, um problema de saúde. Muitos textos foram escritos por quem programa e têm palavras técnicas. A medição da semana passada achou jargão técnico nas respostas. Linguagem simples, na prática: frase curta (até cerca de 20 palavras); uma ideia por frase; palavra do dia a dia; voz ativa (\"vou passar sua conversa para a equipe\", em vez de \"seu atendimento será encaminhado\"); dizer o que a pessoa precisa fazer; nada de sigla nem nome de sistema (Verde, SEEU, handoff); e um exemplo quando ajuda. Na Maria, há dois tipos de texto. O fixo está no código, em nomes que começam por TEXTO_ e MENSAGEM_. O outro, a IA reescreve na hora (src/maria/ia/reescrever.py), sempre a partir do texto fixo. Por isso, melhorar o texto fixo melhora os dois. Texto que a pessoa vê conta como código: nada muda sem PR, sem a aprovação da Nicole e sem atualizar o guia de teste da equipe, que confere as mensagens esperadas.",
+      "tempo": "Cerca de 3 dias, depois da T9 e da T10.",
+      "issues_maria": [],
+      "depende_de": [
+        "T9"
+      ],
+      "estudar": [
+        {
+          "titulo": "Guia: baú da fase \"Engenharia de prompt e saída estruturada\"",
+          "link": "#/modulo/m3/2",
+          "porque": "como instruções e exemplos mudam o texto que a IA escreve, inclusive o tom."
+        },
+        {
+          "titulo": "Claude: engenharia de prompt (visão geral)",
+          "link": "https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview",
+          "porque": "clareza, contexto e exemplos: as mesmas regras valem para texto escrito para pessoas."
+        },
+        {
+          "titulo": "Código: src/maria/ia/reescrever.py",
+          "link": "https://github.com/dgd-dprj/maria-langgraph-pp/blob/develop/src/maria/ia/reescrever.py",
+          "porque": "o prompt que a IA usa para reescrever as perguntas. Veja o que ele pede sobre o tom."
+        },
+        {
+          "titulo": "Código: os textos da pessoa presa",
+          "link": "https://github.com/dgd-dprj/maria-langgraph-pp/blob/develop/src/maria/fluxos/pessoa_presa/graph.py",
+          "porque": "exemplo de textos fixos: TEXTO_LIVRE, TEXTO_RG e texto_rg_invalido."
+        },
+        {
+          "titulo": "Código: os textos do fim da conversa",
+          "link": "https://github.com/dgd-dprj/maria-langgraph-pp/blob/develop/src/maria/orquestrador/fila.py",
+          "porque": "a lista dos assuntos em aberto, as opções numeradas e o encerrar."
+        },
+        {
+          "titulo": "Guia de teste da homologação",
+          "link": "https://github.com/dgd-dprj/maria-langgraph-pp/blob/develop/docs/guia-teste-homologacao.md",
+          "porque": "as mensagens que a equipe confere. Se um texto mudar, o guia muda junto."
+        }
+      ],
+      "passos": [
+        "Estude os itens de \"📚 O que estudar\", na ordem.",
+        "No GitHub, no repositório maria-langgraph-pp (branch develop), procure por TEXTO_ e MENSAGEM_ em src/maria/fluxos, src/maria/subgrafos, src/maria/orquestrador e src/maria/api. Faça uma planilha com o arquivo, o nome e o texto atual de cada um.",
+        "Dê uma nota de 1 a 3 a cada texto (1 = claro; 3 = difícil) e diga o problema: palavra técnica, frase longa, voz passiva ou não diz o que fazer.",
+        "Comece pelos de nota 3. Para cada um, escreva a proposta e, numa linha, o porquê.",
+        "Não mude o sentido: o que a Maria promete, os prazos, o número de tentativas e o texto dos botões continuam iguais. Se achar que o sentido deveria mudar, anote em \"observação\" para a Nicole.",
+        "Leia cada proposta em voz alta, como se estivesse no celular. Se tropeçar, encurte.",
+        "No topo da planilha, faça um resumo: quantos textos, quantos de nota 3 e os 5 mais urgentes.",
+        "Preencha a \"Entrega\" e clique em \"📬 Enviar entrega\"."
+      ],
+      "casos_teste": [
+        {
+          "relato": "Vou encaminhar você para um atendente humano.",
+          "esperado": "Exemplo de análise. Nota 2: \"atendente humano\" soa estranho para quem conversa. Proposta: \"Vou passar sua conversa para uma pessoa da nossa equipe.\" Por quê: palavras do dia a dia."
+        },
+        {
+          "relato": "Não consegui ler esse RG (tentativa 1 de 3). Escreva só os números do RG da pessoa presa, sem letras. Por exemplo: 123456789.",
+          "esperado": "Exemplo de análise. Nota 1 ou 2: é claro, mas quem tem RG com X no final fica sem saber o que fazer (veja a T9). Anote em \"observação\"."
+        }
+      ],
+      "campos_entrega": [
+        {
+          "id": "planilha",
+          "rotulo": "Link da planilha (só a equipe)"
+        },
+        {
+          "id": "resumo",
+          "rotulo": "Quantos textos, quantos de nota 3 e os 5 mais urgentes"
+        },
+        {
+          "id": "sentido",
+          "rotulo": "Textos em que você acha que o sentido deveria mudar (para a Nicole decidir)"
+        }
+      ],
+      "entregavel": "A planilha com todos os textos fixos que a pessoa vê, a nota de cada um, a proposta e o porquê, e o resumo com os 5 mais urgentes.",
+      "pronto_quando": [
+        "Todos os TEXTO_ e MENSAGEM_ das quatro pastas estão na planilha.",
+        "Todo texto tem nota e problema; todo texto de nota 3 tem proposta e porquê.",
+        "Nenhuma proposta muda o que a Maria promete, os prazos, as tentativas ou os botões.",
+        "O resumo tem os 5 mais urgentes."
+      ],
+      "cuidados": [
+        "Não edite o código nem abra PR. Quem decide é a Nicole, e o Claude passa para o código.",
+        "O texto dos botões (Sim, Não, \"1. …\") não muda sem combinar: a Tykhe depende dele, e quem configura a Tykhe é o Ícaro.",
+        "Nome técnico (motivoHandoff, statusFinal) não é texto que a pessoa vê: fica fora da planilha.",
+        "Use só exemplos inventados, nunca uma conversa real."
+      ],
+      "lancada_por": "Nicole",
+      "lancada_em": "2026-11-16",
+      "prazo": "2026-11-27",
       "status": "lancada",
       "entrega": {
         "em": null,
