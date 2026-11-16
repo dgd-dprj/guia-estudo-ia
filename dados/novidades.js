@@ -2,6 +2,13 @@ window.NOVIDADES = {
   "explicacao": "A cada atualização do guia, acrescente uma entrada no topo da lista: id único (data e um nome curto), em (AAAA-MM-DD), titulo, texto e link (https:// ou rota interna, como #/tarefas). A página mostra à Marcelle as entradas que ela ainda não viu, e a publicação manda o aviso por email (menção no GitHub). Nunca coloque dado pessoal de assistido nem chave: este arquivo é público.",
   "lista": [
     {
+      "id": "2026-11-16-tarefas-t9-a-t11",
+      "em": "2026-11-16",
+      "titulo": "Suas tarefas novas: T9, T10 e T11, com o que estudar em cada uma (a Tykhe passou para o Ícaro)",
+      "texto": "Decisão da Nicole de 16/11: a configuração da Tykhe (T2 a T8) passou para o Ícaro, para acelerar. Você não precisa terminar nem enviar nada delas; os cartões ficam no fim da lista, com o selo \"Passou para o Ícaro\". Suas tarefas agora, na ordem: T9 (prioridade máxima, até 19/11), um banco de cerca de 100 respostas inventadas para a pergunta do RG e do CPF, a base da próxima correção do RG; T10 (até 25/11), os documentos da base do RAG e as perguntas de avaliação; T11 (até 27/11), as mensagens da Maria em linguagem simples. Cada cartão tem o bloco novo \"📚 O que estudar para esta tarefa\", com os baús do guia e a documentação para ler antes de começar.",
+      "link": "#/tarefas"
+    },
+    {
       "id": "2026-11-13-campos-flowid-tipocaso",
       "em": "2026-11-13",
       "titulo": "T6 e T7: o assunto vai nos campos \"flowId\" ou \"tipoCaso\"",

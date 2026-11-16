@@ -635,14 +635,18 @@
     entregue: { icone: "📬", nome: "Entregue", classe: "entregue" },
     refazer: { icone: "↺", nome: "Ajustar e reenviar", classe: "refazer" },
     avaliada: { icone: "✅", nome: "Avaliada", classe: "bom" },
+    transferida: { icone: "↪", nome: "Passou para outra pessoa", classe: "neutro" },
   };
   const foiEntregue = (t) => t.status === "entregue" || t.status === "avaliada";
+  // Transferida: a tarefa saiu da lista da jogadora (outra pessoa da equipe terminou). Não conta como entrega nem atraso.
+  const foiTransferida = (t) => t.status === "transferida";
+  const fechada = (t) => foiEntregue(t) || foiTransferida(t);
   const horaPrazo = (t) => (/^\d{2}:\d{2}$/.test(t.prazo_hora || "") ? t.prazo_hora : null);
   const textoPrazo = (t) => dataLonga(t.prazo) + (horaPrazo(t) ? " às " + horaPrazo(t) : "");
-  const tarefaUrgente = () => (T.tarefas || []).find((t) => t.urgente && !foiEntregue(t));
+  const tarefaUrgente = () => (T.tarefas || []).find((t) => t.urgente && !fechada(t));
   const PRIORIDADES = { maxima: "🔺 Prioridade máxima", alta: "▲ Prioridade alta", normal: "Prioridade normal" };
   // As tarefas em aberto que pedem pressa: as urgentes e as de prioridade máxima.
-  const tarefasPrioritarias = () => (T.tarefas || []).filter((t) => (t.urgente || t.prioridade === "maxima") && !foiEntregue(t));
+  const tarefasPrioritarias = () => (T.tarefas || []).filter((t) => (t.urgente || t.prioridade === "maxima") && !fechada(t));
 
   // ── Salvar em arquivo: para passar a tarefa adiante (por exemplo, ao Ícaro) ──
   // O arquivo leva a tarefa inteira, os passos marcados, o que foi escrito na entrega e o que falta.
@@ -664,6 +668,10 @@
     linhas.push("- Passos feitos: " + feitos + " de " + passos.length, "", t.descricao || "");
     if (t.objetivo) linhas.push("", "## Objetivo", "", t.objetivo);
     if (t.contexto) linhas.push("", "## Para entender", "", t.contexto);
+    if (Array.isArray(t.estudar) && t.estudar.length) {
+      linhas.push("", "## O que estudar", "");
+      t.estudar.forEach((e) => linhas.push("- " + e.titulo + (e.link ? " (" + e.link + ")" : "") + (e.porque ? ": " + e.porque : "")));
+    }
     if (Array.isArray(t.identificadores) && t.identificadores.length) {
       linhas.push("", "## Identificadores", "", "| Identificador | Onde aparece | Como reconhecer e o que fazer |", "|---|---|---|");
       t.identificadores.forEach((x) => linhas.push("| `" + x.nome + "` | " + x.onde + " | " + x.como + " |"));
@@ -701,6 +709,7 @@
     return b;
   }
   function situacaoPrazo(t, ref) {
+    if (foiTransferida(t)) return { texto: "↪ passou para " + (t.transferida_para || "outra pessoa"), classe: "neutro", atraso: 0 };
     if (!dataValida(t.prazo)) return { texto: "sem prazo", classe: "neutro", atraso: 0 };
     const em = t.entrega && dataValida(t.entrega.em) ? t.entrega.em : null;
     if (em) {
@@ -853,12 +862,12 @@
     const minimizar = el("button", { type: "button", classe: "botao secundario botao-minimizar", "aria-controls": corpoId });
     const salvas = lerMinimizadas();
     const minimizada = t.id in salvas ? !!salvas[t.id] : !abertaPorPadrao;
-    const cartao = el("article", { classe: "painel tarefa-cartao" + (t.urgente && !foiEntregue(t) ? " urgente" : "") }, [
+    const cartao = el("article", { classe: "painel tarefa-cartao" + (t.urgente && !fechada(t) ? " urgente" : "") }, [
       el("div", { classe: "tarefa-topo" }, [
         el("span", { classe: "tarefa-id", texto: t.id }), el("h3", { texto: t.titulo }),
-        t.urgente && !foiEntregue(t) ? el("span", { classe: "selo critico", texto: "🚨 Urgente" }) : null,
-        t.prioridade && PRIORIDADES[t.prioridade] && t.prioridade !== "normal" ? el("span", { classe: "selo critico", texto: PRIORIDADES[t.prioridade] }) : null,
-        seloStatus(t.status),
+        t.urgente && !fechada(t) ? el("span", { classe: "selo critico", texto: "🚨 Urgente" }) : null,
+        t.prioridade && PRIORIDADES[t.prioridade] && t.prioridade !== "normal" && !fechada(t) ? el("span", { classe: "selo critico", texto: PRIORIDADES[t.prioridade] }) : null,
+        foiTransferida(t) ? el("span", { classe: "selo neutro", texto: "↪ Passou para " + (t.transferida_para || "outra pessoa") }) : seloStatus(t.status),
         dataValida(t.atualizada_em) ? el("span", { classe: "selo atualizada", texto: "🔄 Atualizada em " + dataLonga(t.atualizada_em) }) : null,
         minimizar,
       ]),
@@ -879,6 +888,13 @@
       entrega.observacao ? el("p", { classe: "meta" }, ["📝 ", entrega.observacao]) : null,
       t.objetivo ? bloco("🎯 Objetivo", el("p", { texto: t.objetivo })) : null,
       t.contexto ? bloco("🧭 Para entender", el("p", { texto: t.contexto })) : null,
+      Array.isArray(t.estudar) && t.estudar.length ? bloco("📚 O que estudar para esta tarefa", el("div", {}, [
+        el("p", { classe: "meta", texto: "Estude antes de começar, na ordem. Os links internos levam ao baú da fase do guia; os outros, à documentação oficial ou ao código da Maria." }),
+        el("ol", { classe: "tarefa-lista" }, t.estudar.map((e) => el("li", {}, [
+          e.link ? linkSeguro(e.titulo, e.link) : el("strong", { texto: e.titulo }),
+          e.porque ? el("span", { texto: ": " + e.porque }) : null,
+        ]))),
+      ])) : null,
       Array.isArray(t.identificadores) && t.identificadores.length ? bloco("🔑 Identificadores", el("div", {}, [
         el("p", { classe: "meta", texto: "Os nomes exatos que aparecem na Maria e na Tykhe. Use para saber qual resposta é qual e o que fazer com ela." }),
         tabelaSimples(["Identificador", "Onde aparece", "Como reconhecer e o que fazer"],
@@ -899,7 +915,9 @@
       ])))) : null,
       Array.isArray(t.pronto_quando) && t.pronto_quando.length ? bloco("🏁 Pronto quando", lista(t.pronto_quando)) : null,
       Array.isArray(t.cuidados) && t.cuidados.length ? bloco("⚠️ Cuidados", el("div", { classe: "cuidado" }, [lista(t.cuidados)])) : null,
-      foiEntregue(t) ? (t.entregavel ? bloco("📦 O que foi pedido", el("p", { texto: t.entregavel })) : null) : blocoEntrega(t, passos),
+      foiTransferida(t)
+        ? bloco("↪ Esta tarefa saiu da sua lista", el("p", { texto: "Quem termina agora é " + (t.transferida_para || "outra pessoa da equipe") + ". Você não precisa fazer nem enviar nada. O que você já marcou continua salvo neste navegador." }))
+        : foiEntregue(t) ? (t.entregavel ? bloco("📦 O que foi pedido", el("p", { texto: t.entregavel })) : null) : blocoEntrega(t, passos),
       el("h4", { texto: "⭐ Avaliação" }),
       blocoAvaliacao(t),
       ]),
@@ -915,7 +933,7 @@
   }
   function paginaTarefas() {
     const lista = T.tarefas || [];
-    const abertas = lista.filter((t) => !foiEntregue(t)).length;
+    const abertas = lista.filter((t) => !fechada(t)).length;
     const urgente = tarefaUrgente();
     const prioritarias = tarefasPrioritarias();
     const fala = !lista.length ? "Ainda não há tarefas lançadas. Quando a Nicole ou o Ícaro lançarem, elas aparecem aqui."
@@ -923,17 +941,18 @@
         ".\nPrazo: " + textoPrazo(prioritarias[0]) + ". Faça na ordem, uma de cada vez.\nNão deu para terminar? Salve em arquivo e mande ao Ícaro."
       : urgente ? "🚨 Tarefa urgente: " + urgente.id + " — " + urgente.titulo + ".\nPrazo: " + textoPrazo(urgente) + ". Comece por ela!"
         : "Estas são as tarefas que a Nicole e o Ícaro lançaram para você.\n" + (abertas ? "Em aberto: " + abertas + ". Ao terminar, use \"Enviar entrega\"." : "Tudo entregue! 🎉");
-    // Urgente em aberto primeiro; depois as abertas pelo prazo; as entregues no fim.
-    const ordem = (t) => (foiEntregue(t) ? 2 : t.urgente ? 0 : 1);
+    // Urgente em aberto primeiro; depois as abertas pela prioridade e pelo prazo; as entregues e as transferidas no fim.
+    const PESO_PRIORIDADE = { maxima: 0, alta: 1, normal: 2 };
+    const ordem = (t) => (foiTransferida(t) ? 4 : foiEntregue(t) ? 3 : t.urgente ? 0 : 1 + (PESO_PRIORIDADE[t.prioridade] ?? 2) / 10);
     const ordenadas = lista.slice().sort((a, b) => ordem(a) - ordem(b) || String(a.prazo || "9").localeCompare(String(b.prazo || "9")));
     const salvarTodas = el("button", { type: "button", classe: "botao", texto: "💾 Salvar todas as tarefas em aberto num arquivo (para o Ícaro)" });
     salvarTodas.addEventListener("click", () => {
-      const abertasLista = ordenadas.filter((t) => !foiEntregue(t));
+      const abertasLista = ordenadas.filter((t) => !fechada(t));
       baixarArquivo("tarefas-em-aberto-para-o-icaro.md", cabecalhoDoArquivo() + abertasLista.map(textoDaTarefa).join("\n\n---\n\n") + "\n");
       avisar("💾 Arquivo salvo com " + plural(abertasLista.length, "tarefa", "tarefas") + ": mande para o Ícaro", true);
     });
     // Ao abrir a página, só a próxima tarefa em aberto fica aberta; as outras começam minimizadas.
-    const proxima = ordenadas.find((t) => !foiEntregue(t));
+    const proxima = ordenadas.find((t) => !fechada(t));
     const todas = (minimizada) => {
       document.querySelectorAll(".tarefa-cartao").forEach((c) => {
         aplicarMinimizada(c, minimizada);
@@ -1254,6 +1273,7 @@
     const tarefas = T.tarefas || [];
     const sit = tarefas.map((t) => situacaoPrazo(t, ref));
     const entregues = tarefas.filter(foiEntregue).length;
+    const transferidas = tarefas.filter(foiTransferida).length;
     const atrasadas = sit.filter((s) => s.atrasada).length;
     const noPrazo = sit.filter((s) => s.noPrazo).length;
     const comDataEntrega = sit.filter((s) => s.noPrazo || s.classe === "atraso").length;
@@ -1267,7 +1287,8 @@
       cartaoNumero("Quiz de primeira", quizTentadas ? pct(quizAcertoPrimeira, quizTentadas) + "%" : "—",
         quizTentadas ? quizAcertoPrimeira + " de " + quizTentadas + " acertadas na 1ª tentativa · " + quizTentadas + "/" + quizTotal + " respondidas" : "nenhuma pergunta respondida ainda"),
       cartaoNumero("Prática", treinos + "/" + r.fases.length, "treinos feitos · missões das fases " + missoes + "/" + r.fases.length + " · pronto " + pronto[0] + "/" + pronto[1]),
-      cartaoNumero("Tarefas lançadas", entregues + "/" + tarefas.length, "entregues · " + plural(atrasadas, "atrasada", "atrasadas") + (comDataEntrega ? " · " + noPrazo + "/" + comDataEntrega + " no prazo" : ""), atrasadas ? "alerta" : null),
+      cartaoNumero("Tarefas lançadas", entregues + "/" + (tarefas.length - transferidas), "entregues · " + plural(atrasadas, "atrasada", "atrasadas") + (comDataEntrega ? " · " + noPrazo + "/" + comDataEntrega + " no prazo" : "") +
+        (transferidas ? " · " + plural(transferidas, "passou", "passaram") + " para outra pessoa" : ""), atrasadas ? "alerta" : null),
       cartaoNumero("Avaliação média", fmtNota(mediaGeral), medias.length ? "de " + plural(medias.length, "tarefa avaliada", "tarefas avaliadas") : "nenhuma tarefa avaliada ainda"),
       cartaoNumero("Ritmo", primeiro ? fmt(porSemana) + " XP/sem" : "—",
         previsao ? "no ritmo atual, termina em cerca de " + plural(previsao, "semana", "semanas") : faltam ? "sem avanço registrado ainda" : "jornada concluída 🏆"),
