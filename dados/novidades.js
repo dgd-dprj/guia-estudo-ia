@@ -2,6 +2,13 @@ window.NOVIDADES = {
   "explicacao": "A cada atualização do guia, acrescente uma entrada no topo da lista: id único (data e um nome curto), em (AAAA-MM-DD), titulo, texto e link (https:// ou rota interna, como #/tarefas). A página mostra à Marcelle as entradas que ela ainda não viu, e a publicação manda o aviso por email (menção no GitHub). Nunca coloque dado pessoal de assistido nem chave: este arquivo é público.",
   "lista": [
     {
+      "id": "2026-11-24-tarefas-t12-t13",
+      "em": "2026-11-24",
+      "titulo": "Suas tarefas novas: T12 (testar a leitura de risco) e T13 (o RAG que admite quando não sabe)",
+      "texto": "Aprovadas pela Nicole em 24/11. T12 (até 01/12): 40 relatos inventados num teste pytest, medindo quantas vezes a IA marca risco sem perigo e ajustando o pedido até zerar os alarmes falsos. T13 (até 08/12): um modo do RAG para as dúvidas da pessoa, com um segundo agente que confere a resposta, medido com as 48 perguntas da T10 no Qwen em São Paulo. A T1, a T9, a T10 e a T11 foram encerradas. Cada cartão novo tem o bloco \"📚 O que estudar\", com os estudos novos dos módulos 1, 3 e 9.",
+      "link": "#/tarefas"
+    },
+    {
       "id": "2026-11-24-estudo-pytest-agentes-prompt",
       "em": "2026-11-24",
       "titulo": "Três estudos novos: testes em Python, engenharia de prompt e agentes",
