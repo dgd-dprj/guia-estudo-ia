@@ -275,6 +275,11 @@ window.GUIA = {
           "porque": "As chamadas à IA e ao Verde são assíncronas."
         },
         {
+          "titulo": "Vídeo: Testes Unitários em Python (playlist, em português)",
+          "link": "https://www.youtube.com/watch?v=_CUNnRVjpKQ&list=PLAgbpJQADBGIicaxuo9hI5EmcK85ck5X2",
+          "porque": "Comece por aqui, mesmo sem saber Python a fundo: testar é a forma mais segura de mexer na Maria, e toda mudança nela vem com teste. Depois das aulas, as páginas do pytest abaixo ficam bem mais fáceis."
+        },
+        {
           "titulo": "pytest: primeiros passos",
           "link": "https://docs.pytest.org/en/stable/getting-started.html",
           "porque": "Todos os testes da Maria."
@@ -474,6 +479,11 @@ window.GUIA = {
           "titulo": "Código: src/maria/ia/classificar_necessidades.py",
           "link": "https://github.com/dgd-dprj/maria-langgraph-pp/blob/develop/src/maria/ia/classificar_necessidades.py",
           "porque": "Um prompt longo com regras e a função _validar, que confere a saída."
+        },
+        {
+          "titulo": "Guia de Engenharia de Prompt (DAIR.AI), em português",
+          "link": "https://www.promptingguide.ai/pt",
+          "porque": "Leia nesta ordem: o básico, os elementos de um prompt e as dicas gerais (Introdução); depois zero-shot, few-shot e chain-of-thought (Técnicas); e por fim Riscos, com a injeção de prompt. Parte do site ainda está em inglês."
         }
       ],
       "checar": [
@@ -988,6 +998,11 @@ window.GUIA = {
           "titulo": "Model Context Protocol (MCP)",
           "link": "https://modelcontextprotocol.io/introduction",
           "porque": "O padrão para ligar ferramentas aos modelos."
+        },
+        {
+          "titulo": "Curso: IA Agêntica (Escola de Inteligência Artificial)",
+          "link": "https://www.eia.ai/p/products/agentic-ai",
+          "porque": "Agentes que usam RAG, vários agentes trabalhando juntos e um pouco de observabilidade: o caminho que a Maria segue com o orquestrador e o RAG."
         }
       ],
       "checar": [
