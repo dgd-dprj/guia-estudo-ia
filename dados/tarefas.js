@@ -88,7 +88,7 @@ window.TAREFAS = {
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-09",
       "prazo": "2026-11-16",
-      "status": "lancada",
+      "status": "entregue",
       "entrega": {
         "em": null,
         "link": null,
@@ -123,7 +123,9 @@ window.TAREFAS = {
           "id": "duvida",
           "rotulo": "Uma dúvida que ficou"
         }
-      ]
+      ],
+      "atualizada_em": "2026-11-24",
+      "atualizacao": "Encerrada pela Nicole em 24/11."
     },
     {
       "id": "T2",
@@ -1242,7 +1244,7 @@ window.TAREFAS = {
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-16",
       "prazo": "2026-11-19",
-      "status": "lancada",
+      "status": "entregue",
       "entrega": {
         "em": null,
         "link": null,
@@ -1259,7 +1261,9 @@ window.TAREFAS = {
           "autonomia": null
         },
         "comentario": ""
-      }
+      },
+      "atualizada_em": "2026-11-24",
+      "atualizacao": "Encerrada em 24/11: virou as issues #538, #539 e #540 da Maria."
     },
     {
       "id": "T10",
@@ -1374,7 +1378,7 @@ window.TAREFAS = {
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-16",
       "prazo": "2026-11-25",
-      "status": "lancada",
+      "status": "entregue",
       "entrega": {
         "em": null,
         "link": null,
@@ -1391,7 +1395,9 @@ window.TAREFAS = {
           "autonomia": null
         },
         "comentario": ""
-      }
+      },
+      "atualizada_em": "2026-11-24",
+      "atualizacao": "Encerrada pela Nicole em 24/11. A continuação é a T13."
     },
     {
       "id": "T11",
@@ -1451,7 +1457,7 @@ window.TAREFAS = {
       "casos_teste": [
         {
           "relato": "Vou encaminhar você para um atendente humano.",
-          "esperado": "Exemplo de análise. Nota 2: \"atendente humano\" soa estranho para quem conversa. Proposta: \"Vou passar sua conversa para uma pessoa da nossa equipe.\" Por quê: palavras do dia a dia."
+          "esperado": "Exemplo de análise. Nota 2: \"atendente humano\" soa estranho para quem conversa. Proposta, com a frase padrão decidida pela Nicole: \"Vou passar a sua conversa para o nosso atendimento humano, que continua com você por aqui.\" Por quê: palavras do dia a dia, e diz o que vai acontecer sem prometer prazo."
         },
         {
           "relato": "Não consegui ler esse RG (tentativa 1 de 3). Escreva só os números do RG da pessoa presa, sem letras. Por exemplo: 123456789.",
@@ -1488,6 +1494,245 @@ window.TAREFAS = {
       "lancada_por": "Nicole",
       "lancada_em": "2026-11-16",
       "prazo": "2026-11-27",
+      "status": "entregue",
+      "entrega": {
+        "em": null,
+        "link": null,
+        "observacao": ""
+      },
+      "avaliacao": {
+        "por": [],
+        "em": null,
+        "criterios": {
+          "qualidade": null,
+          "testes": null,
+          "prazo": null,
+          "comunicacao": null,
+          "autonomia": null
+        },
+        "comentario": ""
+      },
+      "atualizada_em": "2026-11-24",
+      "atualizacao": "Encerrada pela Nicole em 24/11. A frase padrão do atendimento humano foi decidida."
+    },
+    {
+      "id": "T12",
+      "titulo": "Testar e ajustar a leitura de risco",
+      "prioridade": "alta",
+      "fase": "m1",
+      "descricao": "Escrever 40 relatos inventados com o resultado esperado, testar com pytest como o Qwen lê o risco em cada um e ajustar o pedido à IA até não haver alarme falso.",
+      "objetivo": "Aprender a testar IA com pytest e a melhorar um prompt medindo o antes e o depois, num problema real da Maria.",
+      "contexto": "Na condução do relato vago (#299 da Maria), a IA vai ler, junto com o assunto, alguns rótulos: se o relato é vago, a emoção, o humor de 1 a 5 e o risco (perigo agora: ameaça ou agressão acontecendo, prisão nas últimas horas). Quando o risco vem marcado, a Maria manda \"ligue 190\" e passa a conversa com prioridade. No teste de 19/11 com 13 relatos inventados, o Qwen marcou risco em 3 relatos sem perigo: um pedido desesperado de ajuda, o medo de falar e \"meu fio tá preso\". Um alarme falso assusta quem só está aflita e gasta a prioridade da equipe. Esta tarefa mede esse erro com um teste que dá para repetir e ajusta o pedido à IA.",
+      "tempo": "Cerca de 1 semana.",
+      "issues_maria": [
+        299
+      ],
+      "depende_de": [],
+      "estudar": [
+        {
+          "titulo": "Vídeo: Testes Unitários em Python (playlist)",
+          "link": "https://www.youtube.com/watch?v=_CUNnRVjpKQ&list=PLAgbpJQADBGIicaxuo9hI5EmcK85ck5X2",
+          "porque": "a base para escrever o teste, mesmo sem saber Python a fundo."
+        },
+        {
+          "titulo": "pytest: parametrize",
+          "link": "https://docs.pytest.org/en/stable/how-to/parametrize.html",
+          "porque": "um teste só que roda os 40 relatos, um por vez."
+        },
+        {
+          "titulo": "Guia de Engenharia de Prompt (DAIR.AI): few-shot",
+          "link": "https://www.promptingguide.ai/pt/techniques/fewshot",
+          "porque": "mostrar à IA exemplos de relato aflito sem perigo e de perigo real."
+        },
+        {
+          "titulo": "Guia de Engenharia de Prompt (DAIR.AI): chain-of-thought",
+          "link": "https://www.promptingguide.ai/pt/techniques/cot",
+          "porque": "quando vale pedir à IA para pensar antes de responder, e o custo disso."
+        },
+        {
+          "titulo": "Guia: baú da fase \"Engenharia de prompt e saída estruturada\"",
+          "link": "#/modulo/m3/2",
+          "porque": "como a definição e os exemplos mudam a resposta da IA."
+        },
+        {
+          "titulo": "Código: src/maria/ia/classificar_necessidades.py",
+          "link": "https://github.com/dgd-dprj/maria-langgraph-pp/blob/develop/src/maria/ia/classificar_necessidades.py",
+          "porque": "a chamada que vai receber os rótulos novos: veja como o esquema fecha as respostas da IA numa lista."
+        }
+      ],
+      "passos": [
+        "Estude os itens de \"📚 O que estudar\", na ordem.",
+        "Escreva 40 relatos inventados, em linguagem de WhatsApp, cada um com o risco esperado (sim ou não): 15 aflitos sem perigo, 10 com perigo agora, 10 vagos e 5 claros.",
+        "Numa branch da maria-langgraph-pp, crie um teste em tests/integracao/ia/ com pytest e parametrize: cada relato vai ao Qwen em São Paulo (modelo qwen.qwen3-vl-235b-a22b, região sa-east-1) com o pedido de rótulos (vago, emoção, humor e risco) e o teste confere o risco esperado.",
+        "Antes de rodar, mande à Nicole a estimativa de custo (cerca de 250 tokens de entrada e 30 de saída por relato) e espere a aprovação.",
+        "Rode e anote o antes: quantos alarmes falsos nos 15 aflitos e quantos perigos marcados nos 10.",
+        "Ajuste o pedido à IA: uma definição de risco mais estreita (ameaça ou agressão acontecendo agora) e exemplos few-shot de relato aflito sem perigo. Rode de novo e anote o depois.",
+        "Abra um PR em rascunho para a develop e preencha a \"Entrega\"."
+      ],
+      "casos_teste": [
+        {
+          "relato": "pelo amor de Deus me ajuda não sei mais o que fazer",
+          "esperado": "risco: não. É angústia, sem perigo agora. Em 19/11 o Qwen marcou risco aqui."
+        },
+        {
+          "relato": "ele tá aqui na porta me ameaçando",
+          "esperado": "risco: sim. Ameaça acontecendo agora: este não pode deixar de ser marcado."
+        }
+      ],
+      "campos_entrega": [
+        {
+          "id": "pr",
+          "rotulo": "Link do PR em rascunho"
+        },
+        {
+          "id": "tabela",
+          "rotulo": "Antes e depois: alarmes falsos nos 15 aflitos, perigos marcados nos 10 e o custo de cada rodada"
+        },
+        {
+          "id": "prompt",
+          "rotulo": "O que mudou no pedido à IA e por quê"
+        },
+        {
+          "id": "duvidas",
+          "rotulo": "Dúvidas (se não ficou nenhuma, escreva \"nenhuma\")"
+        }
+      ],
+      "entregavel": "O teste com os 40 relatos inventados, o pedido à IA ajustado e a tabela do antes e do depois.",
+      "pronto_quando": [
+        "Os 40 relatos estão no teste, cada um com o risco esperado.",
+        "Zero alarmes falsos nos 15 relatos aflitos sem perigo.",
+        "Os 10 relatos com perigo continuam marcados com risco.",
+        "A tabela mostra o antes, o depois e o custo de cada rodada."
+      ],
+      "cuidados": [
+        "Só relatos inventados, nunca uma conversa real.",
+        "O custo é aprovado pela Nicole antes de rodar.",
+        "O teste fica marcado como integração e não roda no CI.",
+        "O pedido à IA fica no teste: o código da Maria (src/) não muda nesta tarefa."
+      ],
+      "lancada_por": "Nicole",
+      "lancada_em": "2026-11-24",
+      "prazo": "2026-12-01",
+      "status": "lancada",
+      "entrega": {
+        "em": null,
+        "link": null,
+        "observacao": ""
+      },
+      "avaliacao": {
+        "por": [],
+        "em": null,
+        "criterios": {
+          "qualidade": null,
+          "testes": null,
+          "prazo": null,
+          "comunicacao": null,
+          "autonomia": null
+        },
+        "comentario": ""
+      }
+    },
+    {
+      "id": "T13",
+      "titulo": "O RAG de dúvidas que admite quando não sabe",
+      "prioridade": "alta",
+      "fase": "m9",
+      "descricao": "Criar no RAG um modo para as dúvidas da pessoa, com um segundo agente que confere a resposta, e medir com as 48 perguntas da T10 no Qwen em São Paulo.",
+      "objetivo": "Aprender a montar um RAG com dois agentes (um responde, outro confere) e a observar cada chamada, até a IA parar de inventar resposta.",
+      "contexto": "Na T10, a IA inventou resposta em 3 das 8 perguntas que a base não responde. A mais perigosa: disse que pode haver um valor em salários mínimos para o divórcio, e a Defensoria é gratuita. Aquele teste usou o Amazon Nova 2 Lite nos Estados Unidos; a Maria usa o Qwen em São Paulo. O RAG de src/rag foi feito para explicar as mensagens do Verde, e esse modo continua como está. As dúvidas da pessoa precisam de um modo próprio, com prompt próprio e recusa curta. A recusa usa a frase padrão do atendimento humano: \"Não sei responder isso. Vou passar a sua conversa para o nosso atendimento humano, que continua com você por aqui.\"",
+      "tempo": "Cerca de 1 semana, depois da T12.",
+      "issues_maria": [
+        418
+      ],
+      "depende_de": [
+        "T10"
+      ],
+      "estudar": [
+        {
+          "titulo": "Curso: IA Agêntica (Escola de Inteligência Artificial)",
+          "link": "https://www.eia.ai/p/products/agentic-ai",
+          "porque": "agentes com RAG, vários agentes trabalhando juntos e observabilidade."
+        },
+        {
+          "titulo": "Guia de Engenharia de Prompt (DAIR.AI): RAG",
+          "link": "https://www.promptingguide.ai/pt/techniques/rag",
+          "porque": "como a resposta se apoia nos trechos encontrados."
+        },
+        {
+          "titulo": "Guia de Engenharia de Prompt (DAIR.AI): factualidade",
+          "link": "https://www.promptingguide.ai/pt/risks/factuality",
+          "porque": "por que a IA inventa e como reduzir isso."
+        },
+        {
+          "titulo": "Guia: baú da fase \"Agentes, ferramentas e MCP\"",
+          "link": "#/modulo/m9/2",
+          "porque": "quando usar um fluxo fixo e quando usar agentes."
+        },
+        {
+          "titulo": "Guia: baú da fase \"RAG em produção\"",
+          "link": "#/modulo/m6/2",
+          "porque": "busca, limiar de similaridade e avaliação da recuperação."
+        },
+        {
+          "titulo": "Código: src/rag/src/rag/chain.py",
+          "link": "https://github.com/dgd-dprj/maria-langgraph-pp/blob/develop/src/rag/src/rag/chain.py",
+          "porque": "a cadeia que busca os trechos e chama o modelo; o modo novo segue o mesmo desenho."
+        }
+      ],
+      "passos": [
+        "Estude os itens de \"📚 O que estudar\", na ordem.",
+        "Com a base que você montou na T10, troque o modelo de chat para o Qwen em São Paulo e rode as 48 perguntas sem mudar mais nada: esse é o antes.",
+        "Crie o modo \"dúvidas da pessoa\" em src/rag, separado do modo do Verde: prompt próprio e recusa curta com a frase padrão.",
+        "Acrescente o segundo agente: ele recebe a resposta e os trechos, confere se cada afirmação está nos trechos e, se não estiver, troca a resposta pela recusa.",
+        "Registre, para cada pergunta: tempo, tokens de entrada e de saída, os trechos usados e se respondeu ou recusou.",
+        "Antes de rodar, mande à Nicole a estimativa de custo e espere a aprovação.",
+        "Rode as 48 perguntas com e sem o conferente e monte a planilha do antes e do depois.",
+        "Abra um PR em rascunho para a develop e preencha a \"Entrega\"."
+      ],
+      "casos_teste": [
+        {
+          "relato": "Quanto que a Defensoria cobra de taxa para dar entrada no divórcio consensual?",
+          "esperado": "Se os trechos não dizem, a recusa: \"Não sei responder isso. Vou passar a sua conversa para o nosso atendimento humano, que continua com você por aqui.\" Nunca um valor inventado."
+        },
+        {
+          "relato": "A defensoria abre domingo de manhã para eu levar os papéis da pensão?",
+          "esperado": "A recusa curta, sem deduzir horário a partir de prazos que aparecem nos trechos."
+        }
+      ],
+      "campos_entrega": [
+        {
+          "id": "pr",
+          "rotulo": "Link do PR em rascunho"
+        },
+        {
+          "id": "planilha",
+          "rotulo": "Link da planilha do antes e do depois (só a equipe)"
+        },
+        {
+          "id": "resultado",
+          "rotulo": "Respostas inventadas nas 8 (antes e depois) e acertos nas 40 (antes e depois)"
+        },
+        {
+          "id": "duvidas",
+          "rotulo": "Dúvidas (se não ficou nenhuma, escreva \"nenhuma\")"
+        }
+      ],
+      "entregavel": "O modo de dúvidas com o conferente, os registros de cada pergunta e a planilha do antes e do depois.",
+      "pronto_quando": [
+        "Zero respostas inventadas nas 8 perguntas que a base não responde.",
+        "Nas 40 perguntas com resposta, os acertos são iguais ou melhores que antes.",
+        "Cada pergunta tem tempo, tokens, trechos usados e o desfecho registrados.",
+        "O modo que explica o Verde continua igual, e os testes de src/rag passam."
+      ],
+      "cuidados": [
+        "Nada responde à pessoa assistida até a Nicole decidir o público do RAG.",
+        "Documento em que ficou dúvida entre público e interno fica fora da base.",
+        "Não cole trecho de documento interno em issue: o repositório é público.",
+        "O custo é aprovado pela Nicole antes de rodar."
+      ],
+      "lancada_por": "Nicole",
+      "lancada_em": "2026-11-24",
+      "prazo": "2026-12-08",
       "status": "lancada",
       "entrega": {
         "em": null,

@@ -2,6 +2,20 @@ window.NOVIDADES = {
   "explicacao": "A cada atualização do guia, acrescente uma entrada no topo da lista: id único (data e um nome curto), em (AAAA-MM-DD), titulo, texto e link (https:// ou rota interna, como #/tarefas). A página mostra à Marcelle as entradas que ela ainda não viu, e a publicação manda o aviso por email (menção no GitHub). Nunca coloque dado pessoal de assistido nem chave: este arquivo é público.",
   "lista": [
     {
+      "id": "2026-11-24-tarefas-t12-t13",
+      "em": "2026-11-24",
+      "titulo": "Suas tarefas novas: T12 (testar a leitura de risco) e T13 (o RAG que admite quando não sabe)",
+      "texto": "Aprovadas pela Nicole em 24/11. T12 (até 01/12): 40 relatos inventados num teste pytest, medindo quantas vezes a IA marca risco sem perigo e ajustando o pedido até zerar os alarmes falsos. T13 (até 08/12): um modo do RAG para as dúvidas da pessoa, com um segundo agente que confere a resposta, medido com as 48 perguntas da T10 no Qwen em São Paulo. A T1, a T9, a T10 e a T11 foram encerradas. Cada cartão novo tem o bloco \"📚 O que estudar\", com os estudos novos dos módulos 1, 3 e 9.",
+      "link": "#/tarefas"
+    },
+    {
+      "id": "2026-11-24-estudo-pytest-agentes-prompt",
+      "em": "2026-11-24",
+      "titulo": "Três estudos novos: testes em Python, engenharia de prompt e agentes",
+      "texto": "Indicações da Nicole. No módulo 1, a playlist \"Testes Unitários em Python\": comece por ela, mesmo sem saber Python a fundo, porque toda mudança na Maria vem com teste. No módulo 3, o Guia de Engenharia de Prompt da DAIR.AI em português (o básico, os elementos de um prompt, as técnicas e os riscos). No módulo 9, o curso de IA Agêntica da Escola de Inteligência Artificial: agentes com RAG, vários agentes trabalhando juntos e observabilidade. Cada um está no baú de estudo do módulo, com a ordem sugerida.",
+      "link": "#/modulo/m1/0"
+    },
+    {
       "id": "2026-11-16-tarefas-t9-a-t11",
       "em": "2026-11-16",
       "titulo": "Suas tarefas novas: T9, T10 e T11, com o que estudar em cada uma (a Tykhe passou para o Ícaro)",
